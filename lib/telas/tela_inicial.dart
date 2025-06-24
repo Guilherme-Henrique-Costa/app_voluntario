@@ -66,6 +66,22 @@ class TelaInicial extends StatelessWidget {
                 Navigator.pushNamed(context, '/mensagens');
               },
             ),
+            ListTile(
+              leading: Icon(Icons.calendar_today),
+              title: Text('Agenda'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/agenda');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history),
+              title: Text('Histórico'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/historico');
+              },
+            ),
           ],
         ),
       ),

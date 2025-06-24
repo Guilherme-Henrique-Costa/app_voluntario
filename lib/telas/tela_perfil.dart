@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/voluntario.dart';
+import '../servicos/storage_service.dart';
 
 class TelaPerfil extends StatefulWidget {
   @override
@@ -8,14 +10,32 @@ class TelaPerfil extends StatefulWidget {
 class _TelaPerfilState extends State<TelaPerfil> {
   final formKey = GlobalKey<FormState>();
   final nomeController = TextEditingController();
-  final telefoneController = TextEditingController();
+  final celularController = TextEditingController();
   final emailController = TextEditingController();
   final experienciaController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    carregarDados();
+  }
+
+  Future<void> carregarDados() async {
+    final voluntario = await StorageService.obterVoluntario();
+    if (voluntario != null) {
+      setState(() {
+        nomeController.text = voluntario.nome ?? '';
+        celularController.text = voluntario.celular ?? '';
+        emailController.text = voluntario.emailInstitucional ?? '';
+        experienciaController.text = voluntario.experiencia ?? '';
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF43054e), // Roxo escuro
+      backgroundColor: Color(0xFF43054e),
       appBar: AppBar(
         backgroundColor: Color(0xFF43054e),
         elevation: 0,
@@ -23,13 +43,13 @@ class _TelaPerfilState extends State<TelaPerfil> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Center(
-                child:
-                    Text('+ vercar', style: TextStyle(color: Colors.white70))),
+              child: Text('+ vercar', style: TextStyle(color: Colors.white70)),
+            ),
           )
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: formKey,
           child: ListView(
@@ -44,14 +64,14 @@ class _TelaPerfilState extends State<TelaPerfil> {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'Fulano',
+                    'Perfil do Voluntário',
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ],
               ),
               SizedBox(height: 30),
               _buildCampo('Nome', nomeController),
-              _buildCampo('Número de telefone', telefoneController),
+              _buildCampo('Celular', celularController),
               _buildCampo('E-mail', emailController),
               _buildCampo('Experiências', experienciaController, maxLines: 3),
               SizedBox(height: 20),
