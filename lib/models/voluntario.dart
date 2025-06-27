@@ -1,14 +1,17 @@
 class Voluntario {
-  final String? nome;
-  final String? celular;
-  final String? emailInstitucional;
-  final String? experiencia;
+  int? id;
+  String? nome;
+  String? celular;
+  String? emailInstitucional;
+  String? experiencia;
+  String? avatarPath;
 
   Voluntario({
     this.nome,
     this.celular,
     this.emailInstitucional,
     this.experiencia,
+    this.avatarPath,
   });
 
   factory Voluntario.fromJson(Map<String, dynamic> json) {
@@ -17,6 +20,7 @@ class Voluntario {
       celular: json['celular'],
       emailInstitucional: json['emailInstitucional'],
       experiencia: json['experiencia'],
+      avatarPath: json['avatarPath'],
     );
   }
 
@@ -26,6 +30,7 @@ class Voluntario {
       'celular': celular,
       'emailInstitucional': emailInstitucional,
       'experiencia': experiencia,
+      'avatarPath': avatarPath,
     };
   }
 }

@@ -2,7 +2,6 @@ import 'package:app_voluntario/servicos/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'rotas.dart';
-import 'models/voluntario.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      initialRoute: '/login',
+      initialRoute: '/inicial',
       routes: rotas,
       onUnknownRoute: (settings) => MaterialPageRoute(
         builder: (context) => Scaffold(

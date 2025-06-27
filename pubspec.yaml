@@ -31,25 +31,41 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter:
     sdk: flutter
-  http: ^1.4.0
+  flutter_map: ^8.1.1
   flutter_secure_storage: ^9.0.0
+  geocoding: ^2.1.1
+  http: ^1.4.0
+  latlong2: ^0.9.1
   table_calendar: ^3.2.0
-
+  url_launcher: ^6.3.1
+  lottie: ^3.1.0
+  share_plus: ^7.2.1
+  percent_indicator: ^4.2.3
+  image_picker: ^1.0.7
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icone_app.png" 
+  min_sdk_android: 21
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/animations/congrats.json
+    - assets/animations/confetti.json
+    - assets/animations/trophy.json
+    - assets/animations/avatar1.json
+    - assets/animations/avatar2.json
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

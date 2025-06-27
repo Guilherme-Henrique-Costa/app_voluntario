@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../models/voluntario.dart';
-import '../servicos/storage_service.dart';
+import '../../models/voluntario.dart';
+import '../../servicos/storage_service.dart';
 
 class TelaLogin extends StatefulWidget {
   @override
@@ -30,7 +30,7 @@ class _TelaLoginState extends State<TelaLogin> {
       _mensagemErro = null;
     });
 
-    final url = Uri.parse('http://192.168.15.10:8080/api/v1/voluntario/login');
+    final url = Uri.parse('http://10.233.23.35:8080/api/v1/voluntario/login');
 
     try {
       final resposta = await http.post(

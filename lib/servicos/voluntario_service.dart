@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/voluntario.dart';
 
 class VoluntarioService {
-  static const String baseUrl = 'http://192.168.15.10:8080/api/v1/voluntario';
+  static const String baseUrl = 'http://10.233.23.35:8080/api/v1/voluntario';
 
   // Login
   Future<Voluntario?> login(String email, String senha) async {
