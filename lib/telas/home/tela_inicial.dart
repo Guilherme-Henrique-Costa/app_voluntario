@@ -1,45 +1,22 @@
-import 'package:app_voluntario/models/recompensa.dart';
+import 'package:app_voluntario/models/conversa.dart';
+import 'package:app_voluntario/models/vaga_instituicao_model.dart';
+import 'package:app_voluntario/servicos/conversa_service.dart';
+import 'package:app_voluntario/servicos/vaga_instituicao_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:app_voluntario/models/recompensa.dart';
+import 'package:app_voluntario/models/feedback.dart';
+import 'package:app_voluntario/servicos/feedback_service.dart';
 import '../vagas/tela_detalhe_vaga.dart';
 import '../recompensa/tela_recompensa.dart';
 
-class TelaInicial extends StatelessWidget {
-  final vagas = [
-    {
-      'titulo': 'Apoio em Eventos Comunitários',
-      'cargo': 'Organizador de Evento',
-      'localidade': 'Quadra 301 Norte',
-      'descricao':
-          'Auxiliar na organização de eventos sociais, recepção do público e montagem de estrutura.',
-      'instituicao': 'Cruz Vermelha',
-      'data': '2025-07-01',
-      'especificacoes': ['Pontualidade', 'Boa comunicação'],
-      'status': 'Disponível',
-    },
-    {
-      'titulo': 'Voluntário de Comunicação',
-      'cargo': 'Redator de Conteúdo',
-      'localidade': 'Centro Cultural',
-      'descricao':
-          'Apoio com textos para redes sociais e envio de e-mails informativos sobre ações sociais.',
-      'instituicao': 'ONG Jovem Ação',
-      'data': '2025-07-10',
-      'especificacoes': [
-        'Criatividade',
-        'Conhecimento básico em redes sociais'
-      ],
-      'status': 'Disponível',
-    },
-  ];
+class TelaInicial extends StatefulWidget {
+  List<Conversa> conversas = [];
+  @override
+  _TelaInicialState createState() => _TelaInicialState();
+}
 
-  final Map<String, dynamic> feedback = {
-    'nota': 5,
-    'comentario': 'Trabalho excelente!\nAjudou a reestruturar nosso sistema.',
-    'autor': 'Fulano',
-    'data': '12/09/2025'
-  };
-
+class _TelaInicialState extends State<TelaInicial> {
   final List<Recompensa> recompensas = [
     Recompensa(
       titulo: 'Voluntário do Mês',
@@ -53,13 +30,45 @@ class TelaInicial extends StatelessWidget {
     ),
   ];
 
+  List<VagaInstituicao> vaga = [];
+  List<Recompensa> recompensa = [];
+  List<FeedbackModel> feedbacks = [];
+  List<Conversa> conversas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarFeedbacks();
+    carregarConversas();
+    carregarVagas();
+  }
+
+  Future<void> _carregarFeedbacks() async {
+    final lista = await FeedbackService.listarFeedbacks();
+    setState(() {
+      feedbacks = lista.reversed.toList();
+    });
+  }
+
+  Future<void> carregarConversas() async {
+    final lista = await ConversaService.listarConversas();
+    setState(() {
+      conversas = lista;
+    });
+  }
+
+  Future<void> carregarVagas() async {
+    final lista = await VagaInstituicaoService().listarVagasDisponiveis();
+    setState(() => vaga = lista);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final vagasResumo = vagas.take(2).toList();
+    final vagasResumo = vaga.take(2).toList();
     final largura = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.deepPurple[900],
+      backgroundColor: Colors.deepPurple[800],
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -95,6 +104,12 @@ class TelaInicial extends StatelessWidget {
                       context, Icons.message, 'Mensagens', '/mensagens'),
                   _buildAtalho(context, Icons.emoji_events, 'Recompensas',
                       '/recompensa'),
+                  _buildAtalho(
+                      context, Icons.feedback, 'Feedback', '/feedback'),
+                  _buildAtalho(context, Icons.feedback_outlined,
+                      'Todos os Feedbacks', '/feedbacks'),
+                  _buildAtalho(
+                      context, Icons.list_alt, 'Minhas Vagas', '/minhas_vagas'),
                 ],
               ),
               SizedBox(height: 30),
@@ -123,9 +138,11 @@ class TelaInicial extends StatelessWidget {
                       ],
                     ),
                     child: ListTile(
-                      title: Text(vaga['titulo'].toString(),
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(vaga['descricao'].toString()),
+                      title: Text(
+                        vaga.cargo,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(vaga.descricao),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.push(
@@ -195,35 +212,86 @@ class TelaInicial extends StatelessWidget {
                 children: [
                   Icon(Icons.feedback, color: Colors.amber),
                   SizedBox(width: 8),
-                  Text('Feedback',
+                  Text('Feedbacks',
                       style: TextStyle(color: Colors.white, fontSize: 18)),
                 ],
               ),
               SizedBox(height: 10),
-              AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    )
-                  ],
-                ),
-                child: ListTile(
-                  leading: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(
-                      feedback['nota'] as int,
-                      (index) =>
-                          Icon(Icons.star, color: Colors.orange, size: 16),
+              ...feedbacks.take(2).map((f) => AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    margin: EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        )
+                      ],
                     ),
-                  ),
-                  title: Text(feedback['comentario']),
-                  subtitle: Text('${feedback['autor']} - ${feedback['data']}'),
+                    child: ListTile(
+                      leading:
+                          Icon(Icons.feedback, color: Colors.deepPurple[800]),
+                      title: Text(f.mensagem),
+                      subtitle:
+                          Text(DateFormat('dd/MM/yyyy – HH:mm').format(f.data)),
+                    ),
+                  )),
+              Divider(color: Colors.white70),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  Icon(Icons.message, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Text('Conversas Recentes',
+                      style: TextStyle(color: Colors.white, fontSize: 18)),
+                ],
+              ),
+              SizedBox(height: 10),
+              ...conversas.take(2).map((c) => AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    margin: EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.deepPurple[200],
+                        child: Text(
+                          c.nomeInstituicao[0].toUpperCase(),
+                          style: TextStyle(color: Colors.deepPurple[900]),
+                        ),
+                      ),
+                      title: Text(c.nomeInstituicao,
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(c.ultimaMensagem),
+                      trailing: Text(
+                        DateFormat('HH:mm').format(c.data),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/chat',
+                        arguments: c.nomeInstituicao,
+                      ),
+                    ),
+                  )),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/mensagens'),
+                  child: Text('Ver todas →',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],

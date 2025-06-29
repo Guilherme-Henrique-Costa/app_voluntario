@@ -8,15 +8,15 @@ class TelaSelecionarLocal extends StatefulWidget {
 }
 
 class _TelaSelecionarLocalState extends State<TelaSelecionarLocal> {
-  LatLng _posicaoInicial =
-      LatLng(-15.7942, -47.8822); // Brasília como centro inicial
+  LatLng _posicaoInicial = LatLng(-15.7942, -47.8822);
   LatLng? _localSelecionado;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Selecionar Local no Mapa'),
+        title: Text('Selecionar Local no Mapa',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple[900],
       ),
       body: Stack(
@@ -52,7 +52,7 @@ class _TelaSelecionarLocalState extends State<TelaSelecionarLocal> {
           ),
           if (_localSelecionado != null)
             Positioned(
-              bottom: 80,
+              bottom: 100,
               left: 20,
               right: 20,
               child: ElevatedButton.icon(
@@ -63,8 +63,9 @@ class _TelaSelecionarLocalState extends State<TelaSelecionarLocal> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                icon: Icon(Icons.check),
-                label: Text('Confirmar Local'),
+                icon: Icon(Icons.check, color: Colors.white),
+                label: Text('Confirmar Local',
+                    style: TextStyle(color: Colors.white)),
                 onPressed: () {
                   Navigator.pop(context, _localSelecionado);
                 },

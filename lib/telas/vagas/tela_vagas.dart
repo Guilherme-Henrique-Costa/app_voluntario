@@ -1,68 +1,102 @@
+import 'package:app_voluntario/models/vaga_instituicao_model.dart';
+import 'package:app_voluntario/servicos/vaga_instituicao_service.dart';
+import 'package:app_voluntario/telas/vagas/tela_detalhe_vaga.dart';
 import 'package:flutter/material.dart';
-import 'tela_detalhe_vaga.dart'; // Certifique-se de que esse arquivo existe
 
-class TelaVagas extends StatelessWidget {
-  final List<Map<String, dynamic>> vagasDisponiveis = [
-    {
-      'titulo': 'Aula de Reforço Escolar',
-      'cargo': 'Professor Voluntário',
-      'localidade': 'Escola Municipal Zumbi',
-      'descricao': 'Ensinar crianças do ensino fundamental.',
-      'especificacoes': ['Didática', 'Conhecimento em matemática e português'],
-      'data': '2025-07-20',
-      'status': 'Disponível',
-      'instituicao': 'EducaMais ONG'
-    },
-    {
-      'titulo': 'Campanha de Arrecadação de Agasalhos',
-      'cargo': 'Organizador de Campanha',
-      'localidade': 'Praça Central',
-      'descricao': 'Auxiliar na coleta e separação de roupas.',
-      'especificacoes': ['Organização', 'Boa comunicação'],
-      'data': '2025-08-05',
-      'status': 'Disponível',
-      'instituicao': 'Voluntários do Bem'
-    },
-  ];
+class TelaVagas extends StatefulWidget {
+  @override
+  _TelaVagasState createState() => _TelaVagasState();
+}
+
+class _TelaVagasState extends State<TelaVagas> {
+  List<VagaInstituicao> vagas = [];
+  bool carregando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    carregarVagas();
+  }
+
+  Future<void> carregarVagas() async {
+    setState(() => carregando = true);
+    try {
+      final lista = await VagaInstituicaoService().listarVagasDisponiveis();
+      setState(() => vagas = lista);
+    } catch (e) {
+      debugPrint('Erro ao carregar vagas: $e');
+    } finally {
+      setState(() => carregando = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Vagas Disponíveis'),
+        title: const Text(
+          'Vagas Disponíveis',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.deepPurple[900],
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: ListView.builder(
-        itemCount: vagasDisponiveis.length,
-        padding: EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          final vaga = vagasDisponiveis[index];
-
-          return Card(
-            elevation: 2,
-            child: ListTile(
-              title: Text(vaga['titulo']),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Cargo: ${vaga['cargo']}'),
-                  Text('Local: ${vaga['localidade']}'),
-                  Text('Instituição: ${vaga['instituicao']}'),
-                ],
+      body: carregando
+          ? const Center(child: CircularProgressIndicator())
+          : Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Color.fromARGB(255, 234, 198, 248),
+                    Color.fromARGB(255, 202, 168, 253),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TelaDetalheVaga(vaga: vaga),
-                  ),
-                );
-              },
+              child: ListView.builder(
+                itemCount: vagas.length,
+                padding: const EdgeInsets.all(16),
+                itemBuilder: (context, index) {
+                  final vaga = vagas[index];
+
+                  return Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      title: Text(
+                        vaga.cargo,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Local: ${vaga.localidade}'),
+                          Text('Instituição: ${vaga.instituicao.nome}'),
+                        ],
+                      ),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Colors.deepPurple,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => TelaDetalheVaga(vaga: vaga),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          );
-        },
-      ),
     );
   }
 }

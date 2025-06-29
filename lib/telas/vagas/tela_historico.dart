@@ -106,6 +106,7 @@ class _TelaHistoricoState extends State<TelaHistorico> {
       appBar: AppBar(
         title: Text('Histórico de Voluntariado'),
         backgroundColor: Colors.deepPurple[900],
+        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: Icon(

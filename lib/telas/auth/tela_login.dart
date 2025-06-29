@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import '../../models/voluntario.dart';
 import '../../servicos/storage_service.dart';
 
@@ -10,27 +12,24 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
-
+  bool _obscureSenha = true;
   bool _carregando = false;
-  String? _mensagemErro;
 
   Future<void> _fazerLogin() async {
     final email = _emailController.text.trim();
     final senha = _senhaController.text.trim();
 
     if (email.isEmpty || senha.isEmpty) {
-      setState(() => _mensagemErro = 'Preencha todos os campos.');
+      _mostrarSnackbar('Preencha todos os campos.', Colors.red);
       return;
     }
 
-    setState(() {
-      _carregando = true;
-      _mensagemErro = null;
-    });
+    setState(() => _carregando = true);
 
-    final url = Uri.parse('http://10.233.23.35:8080/api/v1/voluntario/login');
+    final url = Uri.parse('http://192.168.15.5:8080/api/v1/voluntario/login');
 
     try {
       final resposta = await http.post(
@@ -45,68 +44,164 @@ class _TelaLoginState extends State<TelaLogin> {
       if (resposta.statusCode == 200) {
         final dados = json.decode(resposta.body);
         final voluntario = Voluntario.fromJson(dados);
-
         await StorageService.salvarVoluntario(voluntario);
+        await StorageService.salvarAtual(voluntario);
 
-        Navigator.pushReplacementNamed(context, '/inicial');
+        _mostrarSnackbar('Login realizado com sucesso!', Colors.green);
+
+        Future.delayed(Duration(milliseconds: 400), () {
+          Navigator.of(context).pushReplacementNamed('/inicial');
+        });
       } else {
-        setState(() => _mensagemErro = 'E-mail ou senha inválidos.');
+        _mostrarSnackbar('E-mail ou senha inválidos.', Colors.red);
       }
     } catch (e) {
-      setState(() => _mensagemErro = 'Erro de rede: $e');
+      _mostrarSnackbar('Erro de rede: $e', Colors.red);
     } finally {
       setState(() => _carregando = false);
     }
   }
 
+  void _mostrarSnackbar(String mensagem, Color cor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: cor,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[900],
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.volunteer_activism, size: 100, color: Colors.white),
-              SizedBox(height: 24),
-              _campoTexto(_emailController, 'E-mail institucional', false),
-              SizedBox(height: 16),
-              _campoTexto(_senhaController, 'Senha', true),
-              SizedBox(height: 16),
-              if (_mensagemErro != null)
-                Text(_mensagemErro!, style: TextStyle(color: Colors.redAccent)),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _carregando ? null : _fazerLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  minimumSize: Size(double.infinity, 50),
-                ),
-                child: _carregando
-                    ? CircularProgressIndicator(color: Colors.deepPurple)
-                    : Text('Entrar', style: TextStyle(fontSize: 18)),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.deepPurple.shade300, Colors.deepPurple],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-            ],
+            ),
           ),
-        ),
+          Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: Form(
+                key: _formKey,
+                child: Container(
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple.shade800,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 12,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icon/icone_app2.svg',
+                        width: 100,
+                        height: 100,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 24),
+                      _campoTexto(
+                          _emailController, 'E-mail institucional', false),
+                      SizedBox(height: 16),
+                      _campoTexto(_senhaController, 'Senha', true),
+                      SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/alterar_senha');
+                          },
+                          child: Text(
+                            'Esqueci minha senha',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _carregando ? null : _fazerLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          minimumSize: Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                        ),
+                        child: _carregando
+                            ? Lottie.asset(
+                                'assets/animations/loading.json',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.contain,
+                              )
+                            : Text('Entrar', style: TextStyle(fontSize: 18)),
+                      ),
+                      SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/cadastro');
+                        },
+                        child: Text(
+                          'Não tem cadastro? Cadastre-se',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _campoTexto(
       TextEditingController controller, String label, bool senha) {
-    return TextField(
+    return TextFormField(
       controller: controller,
-      obscureText: senha,
+      obscureText: senha ? _obscureSenha : false,
       style: TextStyle(color: Colors.white),
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Campo obrigatório';
+        if (!senha && !value.contains('@')) return 'E-mail inválido';
+        return null;
+      },
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.white70),
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white24,
+        suffixIcon: senha
+            ? IconButton(
+                icon: Icon(
+                  _obscureSenha ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureSenha = !_obscureSenha;
+                  });
+                },
+              )
+            : null,
       ),
     );
   }
