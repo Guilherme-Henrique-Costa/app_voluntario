@@ -1,17 +1,16 @@
 import 'package:app_voluntario/models/conversa.dart';
 import 'package:app_voluntario/models/vaga_instituicao_model.dart';
-import 'package:app_voluntario/servicos/conversa_service.dart';
 import 'package:app_voluntario/servicos/vaga_instituicao_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:app_voluntario/models/recompensa.dart';
 import 'package:app_voluntario/models/feedback.dart';
 import 'package:app_voluntario/servicos/feedback_service.dart';
+import 'package:app_voluntario/servicos/storage_service.dart';
 import '../vagas/tela_detalhe_vaga.dart';
 import '../recompensa/tela_recompensa.dart';
 
 class TelaInicial extends StatefulWidget {
-  List<Conversa> conversas = [];
   @override
   _TelaInicialState createState() => _TelaInicialState();
 }
@@ -33,13 +32,11 @@ class _TelaInicialState extends State<TelaInicial> {
   List<VagaInstituicao> vaga = [];
   List<Recompensa> recompensa = [];
   List<FeedbackModel> feedbacks = [];
-  List<Conversa> conversas = [];
 
   @override
   void initState() {
     super.initState();
     _carregarFeedbacks();
-    carregarConversas();
     carregarVagas();
   }
 
@@ -47,13 +44,6 @@ class _TelaInicialState extends State<TelaInicial> {
     final lista = await FeedbackService.listarFeedbacks();
     setState(() {
       feedbacks = lista.reversed.toList();
-    });
-  }
-
-  Future<void> carregarConversas() async {
-    final lista = await ConversaService.listarConversas();
-    setState(() {
-      conversas = lista;
     });
   }
 
@@ -100,8 +90,6 @@ class _TelaInicialState extends State<TelaInicial> {
                   _buildAtalho(context, Icons.work, 'Vagas', '/vagas'),
                   _buildAtalho(
                       context, Icons.calendar_today, 'Agenda', '/agenda'),
-                  _buildAtalho(
-                      context, Icons.message, 'Mensagens', '/mensagens'),
                   _buildAtalho(context, Icons.emoji_events, 'Recompensas',
                       '/recompensa'),
                   _buildAtalho(
@@ -239,61 +227,6 @@ class _TelaInicialState extends State<TelaInicial> {
                           Text(DateFormat('dd/MM/yyyy – HH:mm').format(f.data)),
                     ),
                   )),
-              Divider(color: Colors.white70),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Icon(Icons.message, color: Colors.amber),
-                  SizedBox(width: 8),
-                  Text('Conversas Recentes',
-                      style: TextStyle(color: Colors.white, fontSize: 18)),
-                ],
-              ),
-              SizedBox(height: 10),
-              ...conversas.take(2).map((c) => AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    margin: EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        )
-                      ],
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.deepPurple[200],
-                        child: Text(
-                          c.nomeInstituicao[0].toUpperCase(),
-                          style: TextStyle(color: Colors.deepPurple[900]),
-                        ),
-                      ),
-                      title: Text(c.nomeInstituicao,
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(c.ultimaMensagem),
-                      trailing: Text(
-                        DateFormat('HH:mm').format(c.data),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        '/chat',
-                        arguments: c.nomeInstituicao,
-                      ),
-                    ),
-                  )),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/mensagens'),
-                  child: Text('Ver todas →',
-                      style: TextStyle(color: Colors.white)),
-                ),
-              ),
             ],
           ),
         ),
@@ -325,7 +258,7 @@ class _TelaInicialState extends State<TelaInicial> {
             Icon(icone, size: 36, color: Colors.deepPurple[800]),
             SizedBox(height: 10),
             Text(texto,
-                style: TextStyle(fontSize: 16, color: Colors.deepPurple[800])),
+                style: TextStyle(fontSize: 16, color: Colors.deepPurple[800]))
           ],
         ),
       ),

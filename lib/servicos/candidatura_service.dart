@@ -2,15 +2,14 @@ import 'dart:convert';
 import 'package:app_voluntario/models/vaga_candidatada_model.dart';
 import 'package:http/http.dart' as http;
 import '../models/vaga_instituicao_model.dart';
+import '../constants/api.dart'; // Importa baseUrl centralizado
 
 class CandidaturaService {
-  static const String _baseUrl = 'http://192.168.15.5:8080/api/v1';
-
   Future<void> candidatar({
     required int vagaId,
     required int voluntarioId,
   }) async {
-    final url = Uri.parse('$_baseUrl/candidaturas');
+    final url = Uri.parse('$candidaturaUrl/candidaturas');
     final body = jsonEncode({
       'vaga': {'id': vagaId},
       'voluntario': {'id': voluntarioId},
@@ -29,7 +28,7 @@ class CandidaturaService {
 
   Future<List<VagaCandidatada>> buscarCandidaturasDoVoluntario(
       int voluntarioId) async {
-    final url = Uri.parse('$_baseUrl/vagasCandidatadas/$voluntarioId');
+    final url = Uri.parse('$baseUrl/vagasCandidatadas/$voluntarioId');
 
     final response = await http.get(url);
     if (response.statusCode == 200) {
@@ -42,7 +41,7 @@ class CandidaturaService {
 
   Future<bool> verificarCandidatura(int vagaId, int voluntarioId) async {
     final url = Uri.parse(
-        '$_baseUrl/candidaturas/verificar?vagaId=$vagaId&voluntarioId=$voluntarioId');
+        '$candidaturaUrl/candidaturas/verificar?vagaId=$vagaId&voluntarioId=$voluntarioId');
 
     final response = await http.get(url);
     if (response.statusCode == 200) {
@@ -54,7 +53,7 @@ class CandidaturaService {
   }
 
   Future<bool> cancelarCandidatura(int idVaga, int idVoluntario) async {
-    final url = Uri.parse('$_baseUrl/candidaturas/cancelar');
+    final url = Uri.parse('$candidaturaUrl/candidaturas/cancelar');
 
     final response = await http.post(
       url,

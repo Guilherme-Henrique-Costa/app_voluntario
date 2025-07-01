@@ -2,13 +2,12 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../models/voluntario.dart';
+import '../constants/api.dart'; // Import da URL base
 
 class StorageService {
   static const _storage = FlutterSecureStorage();
   static String _chaveVoluntario(String id) => 'voluntario_$id';
   static const _chaveAtual = 'voluntario_atual';
-
-  static const String _baseUrl = 'http://192.168.15.5:8080/api/v1/voluntario/';
 
   static Future<void> salvarVoluntario(Voluntario voluntario) async {
     try {
@@ -29,7 +28,7 @@ class StorageService {
     if (voluntario.id == null) {
       throw Exception('Voluntário sem ID não pode ser atualizado');
     }
-    final url = Uri.parse('$_baseUrl${voluntario.id}');
+    final url = Uri.parse('$baseUrl${voluntario.id}');
     final body = jsonEncode(voluntario.toJsonCompleto());
 
     final response = await http.put(

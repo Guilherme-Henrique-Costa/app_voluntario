@@ -38,7 +38,6 @@ class _TelaMensagensState extends State<TelaMensagens> {
     final voluntario = await StorageService.obterAtual();
 
     if (voluntario == null) {
-      // redireciona ou exibe erro
       Navigator.pushReplacementNamed(context, '/login');
       return;
     }
@@ -121,6 +120,22 @@ class _TelaMensagensState extends State<TelaMensagens> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            '/chat',
+            arguments: {
+              'voluntarioId': voluntarioId!,
+              'voluntarioNome': voluntarioNome!,
+              'nomeInstituicao': 'Nova Instituição'
+            },
+          );
+        },
+        backgroundColor: Colors.deepPurple[900],
+        child: Icon(Icons.message, color: Colors.white),
+        tooltip: 'Nova conversa',
+      ),
     );
   }
 }

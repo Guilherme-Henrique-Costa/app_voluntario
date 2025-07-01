@@ -4,10 +4,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../models/conversa.dart';
 import 'storage_service.dart';
+import '../constants/api.dart'; // Import baseUrl
 
 class ConversaService {
-  static const String _baseUrl =
-      'http://192.168.15.5:8080/api/v1/mensagem-voluntaria';
+  static final String _conversaUrl = '$baseUrl/mensagem-voluntaria';
 
   static Future<List<Conversa>> listarConversas() async {
     final voluntario = await StorageService.obterAtual();
@@ -15,8 +15,20 @@ class ConversaService {
       throw Exception('Voluntário não logado ou sem ID');
     }
 
-    final url = Uri.parse('$_baseUrl/voluntario/${voluntario.id}/conversas');
-    final response = await http.get(url);
+    final url =
+        Uri.parse('$_conversaUrl/voluntario/${voluntario.id}/conversas');
+    final token = voluntario.token;
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    print('Status: ${response.statusCode}');
+    print('Body: ${response.body}');
 
     if (response.statusCode == 200) {
       final List<dynamic> dados = jsonDecode(response.body);
@@ -27,8 +39,8 @@ class ConversaService {
   }
 
   static Future<void> salvarConversaLocal(Conversa c) async {
-    final _key = 'lista_conversas';
-    final _storage = const FlutterSecureStorage();
+    const _key = 'lista_conversas';
+    const _storage = FlutterSecureStorage();
 
     final dados = await _storage.read(key: _key);
     List<Conversa> lista = [];
@@ -48,8 +60,8 @@ class ConversaService {
   }
 
   static Future<List<Conversa>> listarConversasLocal() async {
-    final _key = 'lista_conversas';
-    final _storage = const FlutterSecureStorage();
+    const _key = 'lista_conversas';
+    const _storage = FlutterSecureStorage();
 
     final dados = await _storage.read(key: _key);
     if (dados == null) return [];

@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/vaga_instituicao_model.dart';
+import '../constants/api.dart'; // importa baseUrl centralizado
 
 class VagasVoluntariasService {
-  static const String baseUrl = 'http://192.168.15.5:8080/api/v1';
-
   Future<void> candidatar({
     required int vagaId,
     required int voluntarioId,

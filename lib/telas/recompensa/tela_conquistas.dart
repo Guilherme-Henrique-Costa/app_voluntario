@@ -68,8 +68,12 @@ class _TelaConquistasState extends State<TelaConquistas>
       length: categorias.length,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Conquistas'),
+          title: Text(
+            'Conquistas',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.deepPurple[900],
+          iconTheme: IconThemeData(color: Colors.white),
           bottom: TabBar(
             onTap: (index) => setState(() => _tabIndex = index),
             tabs: categorias.map((c) => Tab(text: c)).toList(),

@@ -15,19 +15,21 @@ class Mensagem {
 
   factory Mensagem.fromJson(Map<String, dynamic> json) {
     return Mensagem(
-      texto: json['mensagemVoluntario'],
-      ehUsuario: json['ehUsuario'],
+      texto: json['mensagemVoluntario'] ?? '',
+      ehUsuario: json['ehUsuario'] ?? false,
       data: DateTime.parse(json['dataHora']),
       voluntarioId: json['voluntario']['id'],
-      voluntarioNome: json['voluntarioNome'],
+      voluntarioNome: json['voluntarioNome'] ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'mensagemVoluntario': texto,
-        'ehUsuario': ehUsuario,
-        'dataHora': data.toIso8601String(),
-        'voluntario': {'id': voluntarioId},
-        'voluntarioNome': voluntarioNome,
-      };
+  Map<String, dynamic> toJson() {
+    return {
+      'mensagemVoluntario': texto,
+      'ehUsuario': ehUsuario,
+      'dataHora': data.toIso8601String(),
+      'voluntario': {'id': voluntarioId},
+      'voluntarioNome': voluntarioNome,
+    };
+  }
 }

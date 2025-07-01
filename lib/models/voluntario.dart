@@ -19,6 +19,7 @@ class Voluntario {
   List<String>? habilidades;
   List<String>? disponibilidadeSemanal;
   String? comentarios;
+  final String? token;
 
   Voluntario({
     this.id,
@@ -40,6 +41,7 @@ class Voluntario {
     this.disponibilidadeSemanal,
     this.comentarios,
     this.avatarPath,
+    this.token,
   });
 
   factory Voluntario.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,7 @@ class Voluntario {
           .toList(),
       comentarios: json['comentarios'],
       avatarPath: json['avatarPath'],
+      token: json['token'],
     );
   }
 
@@ -78,8 +81,10 @@ class Voluntario {
       'matricula': matricula ?? '',
       'nome': nome ?? '',
       'cpf': cpf ?? '',
-      'dataNascimento': dataNascimento?.toIso8601String(),
+      'dataNascimento':
+          dataNascimento != null ? dataNascimento!.toIso8601String() : '',
       'genero': genero ?? '',
+      'senha': senha ?? '',
       'atividadeCEUB': atividadeCEUB ?? [],
       'emailInstitucional': emailInstitucional ?? '',
       'emailParticular': emailParticular ?? '',
@@ -103,13 +108,25 @@ class Voluntario {
   }
 
   bool validarCamposObrigatorios() {
+    final cpfRegex = RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}\$');
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}\$');
+    final idadeMinima = 16;
+
+    final idadeValida = dataNascimento != null
+        ? DateTime.now().difference(dataNascimento!).inDays ~/ 365 >=
+            idadeMinima
+        : false;
+
     return nome?.trim().isNotEmpty == true &&
         matricula?.trim().isNotEmpty == true &&
         cpf?.trim().isNotEmpty == true &&
-        dataNascimento != null &&
+        cpfRegex.hasMatch(cpf!) &&
+        idadeValida &&
         genero?.trim().isNotEmpty == true &&
-        senha?.trim().isNotEmpty == true &&
+        senha != null &&
+        senha!.trim().length >= 6 &&
         emailInstitucional?.trim().isNotEmpty == true &&
+        emailRegex.hasMatch(emailInstitucional!) &&
         celular?.trim().isNotEmpty == true &&
         cidadeUF?.trim().isNotEmpty == true &&
         atividadeCEUB != null &&

@@ -1,15 +1,14 @@
-// lib/servicos/chat_api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/mensagem_model.dart';
+import '../constants/api.dart'; // Importa baseUrl centralizado
 
 class ChatApiService {
-  static const String baseUrl =
-      'http://192.168.15.5:8080/api/v1/mensagem-voluntaria';
+  static final String _chatUrl = '$baseUrl/mensagem-voluntaria';
 
   static Future<List<Mensagem>> buscarMensagensPorVoluntario(
       int voluntarioId) async {
-    final url = Uri.parse('$baseUrl/voluntario/$voluntarioId/mensagens');
+    final url = Uri.parse('$_chatUrl/voluntario/$voluntarioId/mensagens');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -21,7 +20,7 @@ class ChatApiService {
   }
 
   static Future<void> enviarMensagem(Mensagem mensagem) async {
-    final url = Uri.parse(baseUrl);
+    final url = Uri.parse(_chatUrl);
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

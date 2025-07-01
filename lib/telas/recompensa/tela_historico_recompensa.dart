@@ -25,8 +25,12 @@ class TelaHistoricoRecompensas extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Histórico de Recompensas'),
+        title: Text(
+          'Histórico de Recompensas',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.deepPurple[900],
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: ListView.builder(
         itemCount: historico.length,

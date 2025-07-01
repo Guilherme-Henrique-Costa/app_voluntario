@@ -45,9 +45,8 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
       });
     } catch (e, stacktrace) {
       log('Erro ao carregar vagas: $e', stackTrace: stacktrace);
-      setState(() => _carregando = false);
-
       if (!mounted) return;
+      setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro ao carregar vagas: $e'),

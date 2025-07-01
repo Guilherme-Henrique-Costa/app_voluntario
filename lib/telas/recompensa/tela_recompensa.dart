@@ -37,8 +37,12 @@ class _TelaRecompensaState extends State<TelaRecompensa> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recompensa'),
+        title: Text(
+          'Recompensa',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.deepPurple[900],
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       backgroundColor: Colors.deepPurple[900],
       body: SingleChildScrollView(
