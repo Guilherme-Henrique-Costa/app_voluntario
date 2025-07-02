@@ -1,10 +1,10 @@
-import 'package:app_voluntario/servicos/storage_service.dart';
+import 'package:app_voluntario/core/constants/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'rotas.dart';
-import 'telas/mensagens/tela_chat.dart';
-import 'telas/mensagens/tela_mensagens.dart';
+import 'core/routes/rotas.dart';
+import 'features/mensagens/pages/tela_chat.dart';
+import 'features/mensagens/pages/tela_mensagens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
