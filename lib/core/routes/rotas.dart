@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:app_voluntario/features/auth/cadastro/tela_cadastro_voluntario.dart';
 import 'package:app_voluntario/features/feedback/pages/tela_feedback.dart';
 import 'package:app_voluntario/features/feedback/pages/tela_lista_feedback.dart';
 import 'package:app_voluntario/features/perfil/pages/tela_alterar_senha.dart';
 import 'package:app_voluntario/features/recompensa/pages/tela_historico_recompensa.dart';
-import 'package:flutter/material.dart';
+import 'package:app_voluntario/features/dashboard/pages/tela_dashboard.dart';
+import 'package:app_voluntario/features/recomendacoes/pages/tela_recomendacoes.dart';
 
 import '../../features/auth/login/tela_login.dart';
 import '../../home/tela_inicial.dart';
@@ -34,4 +36,6 @@ final Map<String, WidgetBuilder> rotas = {
   '/feedback': (context) => TelaFeedback(),
   '/feedbacks': (context) => TelaListaFeedbacks(),
   '/minhas_vagas': (context) => TelaMinhasVagas(),
+  '/dashboard': (context) => const TelaDashboard(),
+  '/recomendacoes': (context) => TelaRecomendacoes(),
 };

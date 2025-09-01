@@ -192,7 +192,6 @@ class _TelaCadastroVoluntarioState extends State<TelaCadastroVoluntario> {
                       _tituloSessao("Comentários"),
                       _campoTextoMultilinha(
                           "Deixe seus comentários", _comentariosController),
-                      _tituloSessao("Informações Complementares"),
                       SizedBox(height: 24),
                       Center(
                         child: ElevatedButton(

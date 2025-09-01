@@ -135,106 +135,120 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
       ),
       body: _carregando
           ? const Center(child: CircularProgressIndicator())
-          : _vagas.isEmpty
-              ? const Center(
-                  child: Text('Você ainda não se candidatou a nenhuma vaga.'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _vagas.length,
-                  itemBuilder: (context, index) {
-                    final vaga = _vagas[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      child: ListTile(
-                        title: Text(vaga.cargo,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Instituição: ${vaga.instituicao.nome}'),
-                            Text('Local: ${vaga.localidade}'),
-                            if (vaga.dataCandidatura != null)
-                              Text(
-                                  'Candidatado em: ${DateFormat('dd/MM/yyyy').format(vaga.dataCandidatura!)}'),
-                          ],
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (valor) async {
-                            if (valor == 'agenda') {
-                              await _adicionarNaAgenda(vaga);
-                            } else if (valor == 'cancelar') {
-                              await _cancelarCandidatura(vaga.id);
-                            } else if (valor == 'mapa') {
-                              if (vaga.latitude != null &&
-                                  vaga.longitude != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => TelaVisualizarLocal(
-                                      latitude: vaga.latitude!,
-                                      longitude: vaga.longitude!,
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Coordenadas não disponíveis para esta vaga.'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'agenda',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.calendar_today, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Adicionar à agenda')
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'mapa',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.map, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Ver no mapa')
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'cancelar',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.cancel, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Cancelar candidatura')
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TelaDetalheVaga(vaga: vaga),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+          : Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Color.fromARGB(255, 234, 198, 248),
+                    Color.fromARGB(255, 202, 168, 253),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
+              ),
+              child: _vagas.isEmpty
+                  ? const Center(
+                      child:
+                          Text('Você ainda não se candidatou a nenhuma vaga.'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _vagas.length,
+                      itemBuilder: (context, index) {
+                        final vaga = _vagas[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          child: ListTile(
+                            title: Text(vaga.cargo,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Instituição: ${vaga.instituicao.nome}'),
+                                Text('Local: ${vaga.localidade}'),
+                                if (vaga.dataCandidatura != null)
+                                  Text(
+                                      'Candidatado em: ${DateFormat('dd/MM/yyyy').format(vaga.dataCandidatura!)}'),
+                              ],
+                            ),
+                            trailing: PopupMenuButton<String>(
+                              onSelected: (valor) async {
+                                if (valor == 'agenda') {
+                                  await _adicionarNaAgenda(vaga);
+                                } else if (valor == 'cancelar') {
+                                  await _cancelarCandidatura(vaga.id);
+                                } else if (valor == 'mapa') {
+                                  if (vaga.latitude != null &&
+                                      vaga.longitude != null) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => TelaVisualizarLocal(
+                                          latitude: vaga.latitude!,
+                                          longitude: vaga.longitude!,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Coordenadas não disponíveis para esta vaga.'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: 'agenda',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.calendar_today, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Adicionar à agenda')
+                                    ],
+                                  ),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'mapa',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.map, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Ver no mapa')
+                                    ],
+                                  ),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'cancelar',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.cancel, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Cancelar candidatura')
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TelaDetalheVaga(vaga: vaga),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
     );
   }
 }

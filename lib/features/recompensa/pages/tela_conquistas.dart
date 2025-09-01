@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 class Conquista {
   final String titulo;
   final String categoria;
-  final int progresso; // de 0 a 100
+  final int progresso;
   final String descricao;
 
   Conquista({
@@ -68,12 +68,10 @@ class _TelaConquistasState extends State<TelaConquistas>
       length: categorias.length,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            'Conquistas',
-            style: TextStyle(color: Colors.white),
-          ),
+          title:
+              const Text('Conquistas', style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.deepPurple[900],
-          iconTheme: IconThemeData(color: Colors.white),
+          iconTheme: const IconThemeData(color: Colors.white),
           bottom: TabBar(
             onTap: (index) => setState(() => _tabIndex = index),
             tabs: categorias.map((c) => Tab(text: c)).toList(),
@@ -82,12 +80,12 @@ class _TelaConquistasState extends State<TelaConquistas>
         body: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  Text('Filtrar por status: ',
+                  const Text('Filtrar por status:',
                       style: TextStyle(fontWeight: FontWeight.w600)),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   DropdownButton<String>(
                     value: _filtroStatus,
                     items: status
@@ -105,41 +103,66 @@ class _TelaConquistasState extends State<TelaConquistas>
             ),
             Expanded(
               child: conquistasFiltradas.isEmpty
-                  ? Center(child: Text('Nenhuma conquista encontrada.'))
+                  ? const Center(
+                      child: Text(
+                        'Nenhuma conquista encontrada.',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
                   : ListView.builder(
                       itemCount: conquistasFiltradas.length,
                       itemBuilder: (context, index) {
                         final c = conquistasFiltradas[index];
                         return Card(
-                          margin:
-                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: ListTile(
-                            leading: c['concluido']
-                                ? Lottie.asset(
-                                    'assets/animations/confetti.json',
-                                    width: 50,
-                                    height: 50,
-                                    repeat: false,
-                                  )
-                                : Icon(Icons.star_border, size: 40),
-                            title: Text(c['titulo'],
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          elevation: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
                               children: [
-                                Text(c['descricao']),
-                                SizedBox(height: 6),
-                                LinearProgressIndicator(
-                                  value: c['progresso'],
-                                  backgroundColor: Colors.grey[300],
-                                  valueColor:
-                                      AlwaysStoppedAnimation(Colors.deepPurple),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  '${(c['progresso'] * 100).toInt()}% concluído',
-                                  style: TextStyle(fontSize: 12),
-                                ),
+                                c['concluido']
+                                    ? Lottie.asset(
+                                        'assets/animations/confetti.json',
+                                        width: 50,
+                                        height: 50,
+                                        repeat: false,
+                                      )
+                                    : Icon(Icons.star_border,
+                                        size: 50,
+                                        color: Colors.deepPurple[300]),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(c['titulo'],
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16)),
+                                      const SizedBox(height: 4),
+                                      Text(c['descricao']),
+                                      const SizedBox(height: 8),
+                                      LinearProgressIndicator(
+                                        value: c['progresso'],
+                                        backgroundColor: Colors.grey[300],
+                                        valueColor:
+                                            const AlwaysStoppedAnimation(
+                                                Colors.deepPurple),
+                                        minHeight: 6,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${(c['progresso'] * 100).toInt()}% concluído',
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),

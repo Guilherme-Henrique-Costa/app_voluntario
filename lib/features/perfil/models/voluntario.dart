@@ -108,14 +108,33 @@ class Voluntario {
   }
 
   bool validarCamposObrigatorios() {
-    final cpfRegex = RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}\$');
-    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}\$');
+    final cpfRegex = RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$');
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}$');
     final idadeMinima = 16;
 
     final idadeValida = dataNascimento != null
         ? DateTime.now().difference(dataNascimento!).inDays ~/ 365 >=
             idadeMinima
         : false;
+
+    print('nome: ${nome?.trim().isNotEmpty}');
+    print('matricula: ${matricula?.trim().isNotEmpty}');
+    print('cpf: ${cpf?.trim().isNotEmpty} && ${cpfRegex.hasMatch(cpf ?? '')}');
+    print('idade: $idadeValida');
+    print('genero: ${genero?.trim().isNotEmpty}');
+    print('senha: ${senha != null && senha!.trim().length >= 6}');
+    print(
+        'emailInstitucional: ${emailInstitucional?.trim().isNotEmpty} && ${emailRegex.hasMatch(emailInstitucional ?? '')}');
+    print(
+        'emailParticular: ${emailParticular?.trim().isNotEmpty} && ${emailRegex.hasMatch(emailParticular ?? '')}');
+    print('celular: ${celular?.trim().isNotEmpty}');
+    print('cidadeUF: ${cidadeUF?.trim().isNotEmpty}');
+    print(
+        'atividadeCEUB: ${atividadeCEUB != null && atividadeCEUB!.isNotEmpty}');
+    print('causas: ${causas != null && causas!.isNotEmpty}');
+    print('habilidades: ${habilidades != null && habilidades!.isNotEmpty}');
+    print(
+        'disponibilidadeSemanal: ${disponibilidadeSemanal != null && disponibilidadeSemanal!.isNotEmpty}');
 
     return nome?.trim().isNotEmpty == true &&
         matricula?.trim().isNotEmpty == true &&
@@ -127,6 +146,8 @@ class Voluntario {
         senha!.trim().length >= 6 &&
         emailInstitucional?.trim().isNotEmpty == true &&
         emailRegex.hasMatch(emailInstitucional!) &&
+        emailParticular?.trim().isNotEmpty == true &&
+        emailRegex.hasMatch(emailParticular!) &&
         celular?.trim().isNotEmpty == true &&
         cidadeUF?.trim().isNotEmpty == true &&
         atividadeCEUB != null &&

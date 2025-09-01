@@ -123,4 +123,14 @@ class StorageService {
       return null;
     }
   }
+
+  static Future<String?> getUserName() async {
+    try {
+      final voluntario = await obterAtual();
+      return voluntario?.nome;
+    } catch (e) {
+      print('Erro ao obter nome do voluntário: $e');
+      return null;
+    }
+  }
 }
