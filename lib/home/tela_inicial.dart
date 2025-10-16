@@ -6,7 +6,7 @@ import 'package:app_voluntario/features/mensagens/models/conversa.dart';
 import 'package:app_voluntario/features/vagas/models/vaga_instituicao_model.dart';
 import 'package:app_voluntario/features/vagas/services/vaga_instituicao_service.dart';
 import 'package:app_voluntario/features/recompensa/models/recompensa.dart';
-import 'package:app_voluntario/features/feedback/models/feedback.dart';
+import 'package:app_voluntario/features/feedback/models/feedback_model.dart';
 import 'package:app_voluntario/features/feedback/services/feedback_service.dart';
 import 'package:app_voluntario/features/vagas/pages/tela_detalhe_vaga.dart';
 import 'package:app_voluntario/core/constants/storage_service.dart';

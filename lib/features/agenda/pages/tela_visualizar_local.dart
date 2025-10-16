@@ -9,12 +9,13 @@ class TelaVisualizarLocal extends StatefulWidget {
   final double longitude;
 
   const TelaVisualizarLocal({
+    super.key,
     required this.latitude,
     required this.longitude,
   });
 
   @override
-  _TelaVisualizarLocalState createState() => _TelaVisualizarLocalState();
+  State<TelaVisualizarLocal> createState() => _TelaVisualizarLocalState();
 }
 
 class _TelaVisualizarLocalState extends State<TelaVisualizarLocal> {
@@ -34,67 +35,50 @@ class _TelaVisualizarLocalState extends State<TelaVisualizarLocal> {
       );
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
-        setState(() {
-          _endereco = '${p.street}, ${p.subLocality}, ${p.locality}';
-        });
+        setState(() => _endereco = '${p.street}, ${p.locality}');
       }
-    } catch (e) {
-      print('Erro ao obter endereço: $e');
-    }
+    } catch (_) {}
   }
 
-  Future<void> _abrirGoogleMaps() async {
+  Future<void> _abrirNoMaps() async {
     final uri = Uri.parse(
         'https://www.google.com/maps/search/?api=1&query=${widget.latitude},${widget.longitude}');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível abrir o Google Maps')),
-      );
-    }
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   @override
   Widget build(BuildContext context) {
-    final LatLng local = LatLng(widget.latitude, widget.longitude);
+    final local = LatLng(widget.latitude, widget.longitude);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Local do Compromisso',
             style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple[900],
-        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
+            onPressed: _abrirNoMaps,
             icon: const Icon(Icons.map),
-            tooltip: 'Abrir no Google Maps',
-            onPressed: _abrirGoogleMaps,
-          ),
+          )
         ],
       ),
       body: Column(
         children: [
           if (_endereco != null)
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                _endereco!,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
+              padding: const EdgeInsets.all(8),
+              child: Text(_endereco!,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
             ),
           Expanded(
             child: FlutterMap(
               options: MapOptions(
                 initialCenter: local,
                 initialZoom: 15,
-                interactionOptions:
-                    const InteractionOptions(flags: InteractiveFlag.all),
               ),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.app_voluntario',
                 ),
                 MarkerLayer(
                   markers: [

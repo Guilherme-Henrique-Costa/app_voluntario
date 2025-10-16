@@ -1,3 +1,5 @@
+import 'instituicao_model.dart';
+
 class VagaCandidatada {
   final int id;
   final String cargo;
@@ -15,7 +17,7 @@ class VagaCandidatada {
   final double? longitude;
   final String? cidade;
 
-  VagaCandidatada({
+  const VagaCandidatada({
     required this.id,
     required this.cargo,
     required this.localidade,
@@ -35,20 +37,21 @@ class VagaCandidatada {
 
   factory VagaCandidatada.fromJson(Map<String, dynamic> json) {
     return VagaCandidatada(
-      id: json['id'],
+      id: json['id'] ?? 0,
       cargo: json['cargo'] ?? '',
       localidade: json['localidade'] ?? '',
       descricao: json['descricao'] ?? '',
-      especificacoes: List<String>.from(json['especificacoes'] ?? []),
+      especificacoes: List<String>.from(json['especificacoes'] ?? const []),
       tipoVaga: json['tipoVaga'] ?? '',
       area: json['area'] ?? '',
       horario: json['horario'] ?? '',
       tempoVoluntariado: json['tempoVoluntariado'] ?? '',
       disponibilidade: json['disponibilidade'] ?? '',
-      instituicao: Instituicao(
-        id: json['instituicaoId'] ?? 0,
-        nome: json['instituicaoNome'] ?? '',
-      ),
+      instituicao: json['instituicao'] != null
+          ? Instituicao.fromJson(json['instituicao'])
+          : Instituicao(
+              id: json['instituicaoId'] ?? 0,
+              nome: json['instituicaoNome'] ?? ''),
       dataCandidatura: json['dataCandidatura'] != null
           ? DateTime.tryParse(json['dataCandidatura'])
           : null,
@@ -57,11 +60,4 @@ class VagaCandidatada {
       cidade: json['cidade'],
     );
   }
-}
-
-class Instituicao {
-  final int id;
-  final String nome;
-
-  Instituicao({required this.id, required this.nome});
 }

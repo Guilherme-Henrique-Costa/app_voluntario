@@ -1,11 +1,13 @@
-import 'package:app_voluntario/features/feedback/models/feedback.dart';
-import 'package:app_voluntario/features/feedback/services/feedback_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../models/feedback_model.dart';
+import '../services/feedback_service.dart';
 
 class TelaListaFeedbacks extends StatefulWidget {
+  const TelaListaFeedbacks({super.key});
+
   @override
-  _TelaListaFeedbacksState createState() => _TelaListaFeedbacksState();
+  State<TelaListaFeedbacks> createState() => _TelaListaFeedbacksState();
 }
 
 class _TelaListaFeedbacksState extends State<TelaListaFeedbacks> {
@@ -31,47 +33,38 @@ class _TelaListaFeedbacksState extends State<TelaListaFeedbacks> {
     return Scaffold(
       backgroundColor: Colors.deepPurple[800],
       appBar: AppBar(
-        title: Text(
-          'Todos os Feedbacks',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Todos os Feedbacks',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: _carregando
-          ? Center(child: CircularProgressIndicator(color: Colors.amber))
+          ? const Center(child: CircularProgressIndicator(color: Colors.amber))
           : _feedbacks.isEmpty
-              ? Center(
-                  child: Text(
-                    'Nenhum feedback enviado ainda.',
-                    style: TextStyle(color: Colors.white70),
-                  ),
+              ? const Center(
+                  child: Text('Nenhum feedback enviado ainda.',
+                      style: TextStyle(color: Colors.white70)),
                 )
               : ListView.builder(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   itemCount: _feedbacks.length,
                   itemBuilder: (context, index) {
                     final f = _feedbacks[index];
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                    return Card(
+                      color: Colors.white,
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          )
-                        ],
                       ),
+                      margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
-                        leading:
-                            Icon(Icons.feedback, color: Colors.deepPurple[800]),
+                        leading: const Icon(Icons.feedback,
+                            color: Colors.deepPurple),
                         title: Text(f.mensagem),
                         subtitle: Text(
                           DateFormat('dd/MM/yyyy – HH:mm').format(f.data),
+                          style: const TextStyle(color: Colors.black54),
                         ),
                       ),
                     );

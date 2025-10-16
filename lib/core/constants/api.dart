@@ -1,9 +1,15 @@
-/// URL base comum a toda a API
-const String baseUrl = 'http://192.168.0.117:8080/api/v1';
+/// 🌐 Configurações da API do backend
+///
+/// Este arquivo centraliza todos os endpoints usados pela aplicação.
+/// Assim, qualquer alteração no IP/porta/baseUrl é feita em um único lugar.
 
-/// Endpoints específicos
-const String voluntarioUrl = '$baseUrl/voluntario';
-const String candidaturaUrl = '$baseUrl/candidaturas';
-const String mensagemUrl = '$baseUrl/mensagem-voluntaria';
-const String vagaUrl = '$baseUrl/vagasDisponiveis';
-const String vagaInstituicaoUrl = '$baseUrl/vagasInstituicao';
+const String baseUrl = 'http://192.168.0.127:8080/api/v1';
+
+class ApiEndpoints {
+  static const String voluntarios = '$baseUrl/voluntario';
+  static const String candidaturas = '$baseUrl/candidaturas';
+  static const String mensagens = '$baseUrl/mensagem-voluntaria';
+  static const String vagasDisponiveis = '$baseUrl/vagasDisponiveis';
+  static const String vagasInstituicao = '$baseUrl/vagasInstituicao';
+  static const String eventos = '$baseUrl/eventos';
+}

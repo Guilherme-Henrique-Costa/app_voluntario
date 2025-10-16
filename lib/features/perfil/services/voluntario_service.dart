@@ -1,104 +1,126 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:app_voluntario/core/constants/api.dart';
 import '../models/voluntario.dart';
-import '../../../core/constants/api.dart'; // Importa a URL centralizada
 
+/// Serviço responsável por operações relacionadas ao Voluntário.
 class VoluntarioService {
-  // Login
+  static const _endpoint = ApiEndpoints.voluntarios;
+
+  Map<String, String> get _headers => {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+  /// 🔐 Login de voluntário
   Future<Voluntario?> login(String email, String senha) async {
-    final url = Uri.parse('$voluntarioUrl/login');
+    final url = Uri.parse('$_endpoint/login');
+    final body = jsonEncode({
+      'emailInstitucional': email,
+      'password': senha,
+    });
 
     try {
-      final resposta = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'emailInstitucional': email,
-          'password': senha,
-        }),
-      );
+      final response = await http.post(url, headers: _headers, body: body);
 
-      if (resposta.statusCode == 200) {
-        final json = jsonDecode(resposta.body);
-        return Voluntario.fromJson(json);
-      } else {
-        print('Erro no login: ${resposta.statusCode}');
-        print(resposta.body);
-        return null;
+      if (response.statusCode == 200) {
+        return Voluntario.fromJson(jsonDecode(response.body));
       }
+
+      _logErro('login', response);
+      return null;
     } catch (e) {
-      print('Erro no login: $e');
+      print('❌ Erro no login: $e');
       return null;
     }
   }
 
-  // Buscar voluntário por ID
+  /// 🔍 Busca voluntário por ID
   Future<Voluntario?> buscarPorId(int id) async {
-    final url = Uri.parse('$voluntarioUrl/$id');
+    final url = Uri.parse('$_endpoint/$id');
+
     try {
-      final resposta = await http.get(url);
-      if (resposta.statusCode == 200) {
-        final json = jsonDecode(resposta.body);
-        return Voluntario.fromJson(json);
-      } else {
-        print('Erro ao buscar voluntário: ${resposta.statusCode}');
-        return null;
+      final response = await http.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        return Voluntario.fromJson(jsonDecode(response.body));
       }
+
+      _logErro('buscarPorId', response);
+      return null;
     } catch (e) {
-      print('Erro ao buscar voluntário: $e');
+      print('❌ Erro ao buscar voluntário: $e');
       return null;
     }
   }
 
-  // Cadastrar novo voluntário
+  /// 📝 Cadastro de voluntário
   Future<bool> cadastrarVoluntario(Voluntario voluntario) async {
-    final url = Uri.parse(voluntarioUrl);
+    final url = Uri.parse(_endpoint);
+    final body = jsonEncode(voluntario.toJsonCompleto());
+
     try {
-      final jsonBody = jsonEncode(voluntario.toJsonCompleto());
-      print('➡️ JSON enviado: $jsonBody');
+      final response = await http.post(url, headers: _headers, body: body);
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonBody,
-      );
+      print('🔹 [POST] Status: ${response.statusCode}');
+      print('🔹 Body: ${response.body}');
 
-      print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
-
-      return response.statusCode == 201;
+      return response.statusCode == 201 || response.statusCode == 200;
     } catch (e) {
-      print('Erro ao cadastrar voluntário: $e');
+      print('❌ Erro ao cadastrar voluntário: $e');
       return false;
     }
   }
 
-  // Atualizar dados do voluntário
+  /// ✏️ Atualização de voluntário existente
   Future<bool> atualizarVoluntario(Voluntario voluntario) async {
-    if (voluntario.id == null) return false;
+    if (voluntario.id == null) {
+      print('⚠️ ID ausente ao tentar atualizar voluntário.');
+      return false;
+    }
 
-    final url = Uri.parse('$voluntarioUrl/${voluntario.id}');
+    final url = Uri.parse('$_endpoint/${voluntario.id}');
+    final body = jsonEncode(voluntario.toJsonCompleto());
+
     try {
-      final response = await http.put(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(voluntario.toJsonCompleto()),
-      );
-      print('PUT status: ${response.statusCode}');
-      print('PUT body: ${response.body}');
+      final response = await http.put(url, headers: _headers, body: body);
+
+      print('🔹 [PUT] Status: ${response.statusCode}');
+      print('🔹 Body: ${response.body}');
+
       return response.statusCode == 200;
     } catch (e) {
-      print('Erro ao atualizar voluntário: $e');
+      print('❌ Erro ao atualizar voluntário: $e');
       return false;
     }
   }
+
+  /// 🔄 Redefinição de senha
+  Future<Map<String, dynamic>> redefinirSenha(
+      String email, String senha) async {
+    final url = Uri.parse('$_endpoint/redefinir-senha');
+    final body = jsonEncode({'email': email, 'senha': senha});
+
+    try {
+      final response = await http.post(url, headers: _headers, body: body);
+      print('🔹 [POST] redefinir-senha: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+
+      return _erro('Erro ao redefinir senha (status ${response.statusCode}).');
+    } catch (e) {
+      print('❌ Erro ao redefinir senha: $e');
+      return _erro('Falha de conexão com o servidor.');
+    }
+  }
+
+  /// Helpers internos
+  void _logErro(String metodo, http.Response r) {
+    print('⚠️ Erro em $metodo: ${r.statusCode}');
+    print('Body: ${r.body}');
+  }
+
+  Map<String, dynamic> _erro(String msg) => {'sucesso': false, 'mensagem': msg};
 }

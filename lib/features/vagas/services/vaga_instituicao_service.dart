@@ -1,75 +1,18 @@
-// lib/servicos/vaga_instituicao_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/vaga_instituicao_model.dart';
 import '../../../core/constants/api.dart'; // <- baseUrl centralizado
 
 class VagaInstituicaoService {
-  Future<List<VagaInstituicao>> fetchVagasDisponiveis() async {
-    final url = Uri.parse('$baseUrl/vagasDisponiveis');
-
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonList = jsonDecode(response.body);
-        return jsonList.map((json) => VagaInstituicao.fromJson(json)).toList();
-      } else {
-        throw Exception('Erro ao buscar vagas: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Erro fetchVagasDisponiveis: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> candidatarVaga({
-    required int vagaId,
-    required int voluntarioId,
-  }) async {
-    final url = Uri.parse('$baseUrl/candidaturas');
-    final body = jsonEncode({
-      'vaga': {'id': vagaId},
-      'voluntario': {'id': voluntarioId}
-    });
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: body,
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Erro ao se candidatar: ${response.body}');
-      }
-    } catch (e) {
-      print('Erro candidatarVaga: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<VagaInstituicao>> buscarCandidaturasDoVoluntario(
-      int voluntarioId) async {
-    final url = Uri.parse('$baseUrl/candidaturas/voluntario/$voluntarioId');
-
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((e) => VagaInstituicao.fromJson(e)).toList();
-    } else {
-      throw Exception('Erro ao buscar candidaturas: ${response.statusCode}');
-    }
-  }
-
+  /// 🔹 Lista todas as vagas disponíveis
   Future<List<VagaInstituicao>> listarVagasDisponiveis() async {
-    final url = Uri.parse('$baseUrl/vagasDisponiveis');
+    final url = Uri.parse('$baseUrl/vagasInstituicao/vagasDisponiveis');
 
     try {
       final response = await http.get(url);
 
-      print('🔍 Status: ${response.statusCode}');
-      print('🔍 Body: ${response.body}');
+      print('🔍 [listarVagasDisponiveis] Status: ${response.statusCode}');
+      print('🔍 [listarVagasDisponiveis] Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -83,6 +26,65 @@ class VagaInstituicaoService {
     }
   }
 
+  /// 🔹 Realiza candidatura do voluntário em uma vaga
+  Future<void> candidatarVaga({
+    required int vagaId,
+    required int voluntarioId,
+  }) async {
+    final url = Uri.parse('$baseUrl/candidaturas');
+    final body = jsonEncode({
+      'vaga': {'id': vagaId},
+      'voluntario': {'id': voluntarioId}
+    });
+
+    print('📤 [CANDIDATAR] POST $url');
+    print('📦 Body: $body');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      print('📥 [CANDIDATAR] Status: ${response.statusCode}');
+      print('📥 [CANDIDATAR] Body: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Erro ao se candidatar: ${response.body}');
+      }
+    } catch (e) {
+      print('🔥 Erro candidatarVaga: $e');
+      rethrow;
+    }
+  }
+
+  /// 🔹 Busca candidaturas de um voluntário específico
+  Future<List<VagaInstituicao>> buscarCandidaturasDoVoluntario(
+      int voluntarioId) async {
+    final url = Uri.parse('$baseUrl/candidaturas/voluntario/$voluntarioId');
+
+    print('📡 [GET] $url');
+
+    try {
+      final response = await http.get(url);
+
+      print('📥 Status: ${response.statusCode}');
+      print('📥 Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => VagaInstituicao.fromJson(e)).toList();
+      } else {
+        throw Exception('Erro ao buscar candidaturas: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('🔥 Erro buscarCandidaturasDoVoluntario: $e');
+      rethrow;
+    }
+  }
+
+  /// 🔹 Cria uma nova vaga vinculada a uma instituição
   Future<bool> criarVagaInstituicao(VagaInstituicao vaga) async {
     final url = Uri.parse('$baseUrl/vagasInstituicao');
     final body = jsonEncode(vaga.toJson());
@@ -98,8 +100,8 @@ class VagaInstituicaoService {
         body: body,
       );
 
-      print('📥 Status: ${response.statusCode}');
-      print('📥 Response: ${response.body}');
+      print('📥 [CRIAR VAGA] Status: ${response.statusCode}');
+      print('📥 [CRIAR VAGA] Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('✅ Vaga criada com sucesso!');

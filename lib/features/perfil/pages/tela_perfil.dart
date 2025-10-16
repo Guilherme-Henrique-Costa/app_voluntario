@@ -1,121 +1,93 @@
 import 'dart:io';
-import 'package:app_voluntario/features/perfil/services/voluntario_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import '../models/voluntario.dart';
 import '../../../core/constants/storage_service.dart';
+import '../models/voluntario.dart';
+import '../services/voluntario_service.dart';
 
 class TelaPerfil extends StatefulWidget {
-  final int? voluntarioId;
-
-  const TelaPerfil({Key? key, this.voluntarioId}) : super(key: key);
+  const TelaPerfil({super.key});
 
   @override
-  _TelaPerfilState createState() => _TelaPerfilState();
+  State<TelaPerfil> createState() => _TelaPerfilState();
 }
 
 class _TelaPerfilState extends State<TelaPerfil> {
-  Voluntario? voluntario;
-  bool carregando = true;
+  Voluntario? _voluntario;
+  bool _carregando = true;
 
   @override
   void initState() {
     super.initState();
-    carregarDados();
+    _carregarVoluntario();
   }
 
-  Future<void> carregarDados() async {
-    Voluntario? v;
-
+  Future<void> _carregarVoluntario() async {
     try {
-      if (widget.voluntarioId != null) {
-        v = await VoluntarioService().buscarPorId(widget.voluntarioId!);
-      } else {
-        final local = await StorageService.obterAtual();
-        if (local?.id != null) {
-          v = await VoluntarioService().buscarPorId(local!.id!);
-        }
-      }
-
-      if (v == null && widget.voluntarioId != null) {
-        v = await StorageService.obterVoluntarioPorId(widget.voluntarioId!);
-      } else if (v == null) {
-        v = await StorageService.obterAtual();
-      }
-
-      if (v != null) {
-        await StorageService.salvarVoluntario(v);
+      final local = await StorageService.obterAtual();
+      if (local?.id != null) {
+        final dados = await VoluntarioService().buscarPorId(local!.id!);
+        setState(() {
+          _voluntario = dados ?? local;
+          _carregando = false;
+        });
       }
     } catch (e) {
-      print('Erro ao carregar dados do voluntário: $e');
+      print('❌ Erro ao carregar perfil: $e');
+      setState(() => _carregando = false);
     }
-
-    setState(() {
-      voluntario = v;
-      carregando = false;
-    });
   }
 
-  Widget _buildImagemPerfil() {
-    final path = voluntario?.avatarPath;
-    try {
-      if (path != null) {
-        if (path.endsWith('.json')) {
-          return SizedBox(
-            height: 90,
-            width: 90,
-            child: Lottie.asset(path, repeat: true),
-          );
-        } else if (path.contains('assets')) {
-          return CircleAvatar(radius: 45, backgroundImage: AssetImage(path));
-        } else if (File(path).existsSync()) {
-          return CircleAvatar(
-              radius: 45, backgroundImage: FileImage(File(path)));
-        }
-      }
-    } catch (e) {
-      print('Erro ao carregar avatar: \$e');
+  Future<void> _logout() async {
+    await StorageService.removerAtual();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
     }
-    return CircleAvatar(
-      radius: 45,
-      backgroundColor: Colors.white,
-      child: Icon(Icons.person, size: 42, color: Colors.deepPurple),
-    );
   }
 
   Widget _buildCampoInfo(String label, String? valor) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("$label: ", style: TextStyle(fontWeight: FontWeight.bold)),
-            Expanded(child: Text(valor ?? 'Não informado')),
+            Text('$label: ',
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            Expanded(
+              child: Text(
+                valor?.isNotEmpty == true ? valor! : 'Não informado',
+                style: const TextStyle(color: Colors.black87),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCabecalho() {
-    return Column(
-      children: [
-        _buildImagemPerfil(),
-        SizedBox(height: 12),
-        Text('Perfil do Voluntário',
-            style: TextStyle(color: Colors.white, fontSize: 20)),
-      ],
+  Widget _buildImagemPerfil() {
+    final path = _voluntario?.avatarPath;
+    try {
+      if (path != null && path.endsWith('.json')) {
+        return Lottie.asset(path, width: 100, height: 100, repeat: true);
+      } else if (path != null && File(path).existsSync()) {
+        return CircleAvatar(radius: 50, backgroundImage: FileImage(File(path)));
+      } else if (path != null && path.contains('assets')) {
+        return CircleAvatar(radius: 50, backgroundImage: AssetImage(path));
+      }
+    } catch (_) {}
+    return const CircleAvatar(
+      radius: 50,
+      backgroundColor: Colors.white,
+      child: Icon(Icons.person, size: 50, color: Colors.deepPurple),
     );
-  }
-
-  void _logout() async {
-    await StorageService.removerAtual();
-    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -125,10 +97,9 @@ class _TelaPerfilState extends State<TelaPerfil> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: Colors.white),
+            icon: const Icon(Icons.edit, color: Colors.white),
             tooltip: 'Editar Perfil',
             onPressed: () {
               Navigator.pushNamed(context, '/editar_perfil');
@@ -136,123 +107,76 @@ class _TelaPerfilState extends State<TelaPerfil> {
           ),
         ],
       ),
-      body: carregando
-          ? Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.deepPurple.shade300,
-                    Colors.deepPurple.shade900
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: Center(
-                child: Lottie.asset(
-                  'assets/animations/loading.json',
-                  width: 100,
-                  height: 100,
-                ),
-              ),
-            )
+      body: _carregando
+          ? _loadingWidget()
           : Stack(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.deepPurple.shade300,
-                        Colors.deepPurple.shade900
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                ),
+                _background(),
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
+                        _buildImagemPerfil(),
+                        const SizedBox(height: 10),
+                        Text(
+                          _voluntario?.nome ?? 'Voluntário',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.deepPurple[800],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: ListView(
-                              children: [
-                                _buildCabecalho(),
-                                SizedBox(height: 20),
-                                _buildCampoInfo('Nome', voluntario?.nome),
-                                _buildCampoInfo(
-                                    'Matrícula', voluntario?.matricula),
-                                _buildCampoInfo('CPF', voluntario?.cpf),
-                                _buildCampoInfo(
-                                    'Nascimento',
-                                    voluntario?.dataNascimento
-                                        ?.toLocal()
-                                        .toString()
-                                        .split(' ')[0]),
-                                _buildCampoInfo('Gênero', voluntario?.genero),
-                                _buildCampoInfo(
-                                    'E-mail', voluntario?.emailInstitucional),
-                                _buildCampoInfo('Celular', voluntario?.celular),
-                                _buildCampoInfo(
-                                    'Cidade/UF', voluntario?.cidadeUF),
-                                _buildCampoInfo(
-                                    'Motivação', voluntario?.motivacao),
-                                _buildCampoInfo('Horário', voluntario?.horario),
-                                _buildCampoInfo(
-                                    'Atividades',
-                                    (voluntario?.atividadeCEUB
-                                                ?.where(
-                                                    (e) => e.trim().isNotEmpty)
-                                                .toList() ??
-                                            [])
-                                        .join(', ')),
-                                _buildCampoInfo(
-                                    'Causas',
-                                    (voluntario?.causas
-                                                ?.where(
-                                                    (e) => e.trim().isNotEmpty)
-                                                .toList() ??
-                                            [])
-                                        .join(', ')),
-                                _buildCampoInfo(
-                                    'Habilidades',
-                                    (voluntario?.habilidades
-                                                ?.where(
-                                                    (e) => e.trim().isNotEmpty)
-                                                .toList() ??
-                                            [])
-                                        .join(', ')),
-                                _buildCampoInfo(
-                                    'Disponibilidade',
-                                    (voluntario?.disponibilidadeSemanal
-                                                ?.where(
-                                                    (e) => e.trim().isNotEmpty)
-                                                .toList() ??
-                                            [])
-                                        .join(', ')),
-                                _buildCampoInfo(
-                                    'Comentários', voluntario?.comentarios),
-                              ],
+                          child: SingleChildScrollView(
+                            child: Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.deepPurple[800],
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildCampoInfo(
+                                      'Matrícula', _voluntario?.matricula),
+                                  _buildCampoInfo('CPF', _voluntario?.cpf),
+                                  _buildCampoInfo('E-mail',
+                                      _voluntario?.emailInstitucional),
+                                  _buildCampoInfo(
+                                      'Celular', _voluntario?.celular),
+                                  _buildCampoInfo(
+                                      'Cidade/UF', _voluntario?.cidadeUF),
+                                  _buildCampoInfo(
+                                      'Gênero', _voluntario?.genero),
+                                  _buildCampoInfo('Motivação',
+                                      _voluntario?.motivacao ?? ''),
+                                  _buildCampoInfo('Habilidades',
+                                      _voluntario?.habilidades?.join(', ')),
+                                  _buildCampoInfo('Causas',
+                                      _voluntario?.causas?.join(', ')),
+                                  _buildCampoInfo(
+                                      'Disponibilidade',
+                                      _voluntario?.disponibilidadeSemanal
+                                          ?.join(', ')),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: _logout,
-                          icon:
-                              Icon(Icons.exit_to_app, color: Colors.deepPurple),
-                          label: Text('Sair',
-                              style: TextStyle(color: Colors.deepPurple)),
+                          icon: const Icon(Icons.exit_to_app,
+                              color: Colors.deepPurple),
+                          label: const Text(
+                            'Sair',
+                            style: TextStyle(color: Colors.deepPurple),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 32, vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
@@ -267,4 +191,22 @@ class _TelaPerfilState extends State<TelaPerfil> {
             ),
     );
   }
+
+  Widget _loadingWidget() => Center(
+        child: Lottie.asset('assets/animations/loading.json',
+            width: 100, height: 100),
+      );
+
+  Widget _background() => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.deepPurple.shade300,
+              Colors.deepPurple.shade900,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      );
 }

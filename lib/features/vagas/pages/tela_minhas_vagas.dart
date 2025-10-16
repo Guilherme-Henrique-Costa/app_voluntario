@@ -1,19 +1,24 @@
-import 'package:app_voluntario/features/vagas/models/vaga_candidatada_model.dart';
-import 'package:app_voluntario/features/vagas/services/candidatura_service.dart';
-import 'package:app_voluntario/core/constants/storage_service.dart';
-import 'package:app_voluntario/features/agenda/pages/tela_visualizar_local.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:app_voluntario/features/agenda/services/salvar_evento_service.dart';
-import 'package:app_voluntario/features/vagas/pages/tela_detalhe_vaga.dart';
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../../../core/constants/storage_service.dart';
+import '../../agenda/pages/tela_visualizar_local.dart';
+import '../../agenda/services/salvar_evento_service.dart';
+import '../models/vaga_candidatada_model.dart';
+import '../pages/tela_detalhe_vaga.dart';
+import '../services/candidatura_service.dart';
+
 class TelaMinhasVagas extends StatefulWidget {
+  const TelaMinhasVagas({super.key});
+
   @override
   State<TelaMinhasVagas> createState() => _TelaMinhasVagasState();
 }
 
 class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
+  final _service = CandidaturaService();
   List<VagaCandidatada> _vagas = [];
   bool _carregando = true;
 
@@ -30,14 +35,8 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
         throw Exception('Voluntário inválido');
       }
 
-      final response = await CandidaturaService()
-          .buscarCandidaturasDoVoluntario(voluntario.id!);
-
-      if (response is! List) {
-        throw Exception("Resposta da API não é uma lista válida");
-      }
-
-      final lista = response.cast<VagaCandidatada>();
+      final lista =
+          await _service.buscarCandidaturasDoVoluntario(voluntario.id!);
 
       setState(() {
         _vagas = lista;
@@ -49,16 +48,14 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
       setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao carregar vagas: $e'),
-          backgroundColor: Colors.red,
-        ),
+            content: Text('Erro ao carregar vagas: $e'),
+            backgroundColor: Colors.red),
       );
     }
   }
 
   Future<void> _adicionarNaAgenda(VagaCandidatada vaga) async {
     final dia = vaga.dataCandidatura ?? DateTime.now();
-
     final evento = {
       'descricao': vaga.cargo,
       'horario': vaga.horario,
@@ -84,13 +81,11 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
         content: const Text('Deseja realmente cancelar sua candidatura?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Não'),
-          ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Não')),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sim'),
-          ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Sim')),
         ],
       ),
     );
@@ -100,26 +95,22 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
     final voluntario = await StorageService.obterAtual();
     if (voluntario == null) return;
 
-    final sucesso =
-        await CandidaturaService().cancelarCandidatura(idVaga, voluntario.id!);
+    final sucesso = await _service.cancelarCandidatura(idVaga, voluntario.id!);
+
+    if (!mounted) return;
 
     if (sucesso) {
-      setState(() {
-        _vagas.removeWhere((v) => v.id == idVaga);
-      });
-
+      setState(() => _vagas.removeWhere((v) => v.id == idVaga));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Candidatura cancelada.'),
-          backgroundColor: Colors.orange,
-        ),
+            content: Text('Candidatura cancelada.'),
+            backgroundColor: Colors.orange),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erro ao cancelar candidatura.'),
-          backgroundColor: Colors.red,
-        ),
+            content: Text('Erro ao cancelar candidatura.'),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -138,11 +129,7 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
           : Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.white,
-                    Color.fromARGB(255, 234, 198, 248),
-                    Color.fromARGB(255, 202, 168, 253),
-                  ],
+                  colors: [Colors.white, Color(0xFFEAC6F8), Color(0xFFCAA8FD)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -176,73 +163,72 @@ class _TelaMinhasVagasState extends State<TelaMinhasVagas> {
                             ),
                             trailing: PopupMenuButton<String>(
                               onSelected: (valor) async {
-                                if (valor == 'agenda') {
-                                  await _adicionarNaAgenda(vaga);
-                                } else if (valor == 'cancelar') {
-                                  await _cancelarCandidatura(vaga.id);
-                                } else if (valor == 'mapa') {
-                                  if (vaga.latitude != null &&
-                                      vaga.longitude != null) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => TelaVisualizarLocal(
-                                          latitude: vaga.latitude!,
-                                          longitude: vaga.longitude!,
+                                switch (valor) {
+                                  case 'agenda':
+                                    await _adicionarNaAgenda(vaga);
+                                    break;
+                                  case 'mapa':
+                                    if (vaga.latitude != null &&
+                                        vaga.longitude != null) {
+                                      if (!mounted) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => TelaVisualizarLocal(
+                                            latitude: vaga.latitude!,
+                                            longitude: vaga.longitude!,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Coordenadas não disponíveis para esta vaga.'),
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
-                                  }
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Coordenadas não disponíveis para esta vaga.'),
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                      );
+                                    }
+                                    break;
+                                  case 'cancelar':
+                                    await _cancelarCandidatura(vaga.id);
+                                    break;
                                 }
                               },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
+                              itemBuilder: (context) => const [
+                                PopupMenuItem(
                                   value: 'agenda',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.calendar_today, size: 18),
-                                      SizedBox(width: 8),
-                                      Text('Adicionar à agenda')
-                                    ],
-                                  ),
+                                  child: Row(children: [
+                                    Icon(Icons.calendar_today, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('Adicionar à agenda')
+                                  ]),
                                 ),
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'mapa',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.map, size: 18),
-                                      SizedBox(width: 8),
-                                      Text('Ver no mapa')
-                                    ],
-                                  ),
+                                  child: Row(children: [
+                                    Icon(Icons.map, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('Ver no mapa')
+                                  ]),
                                 ),
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'cancelar',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.cancel, size: 18),
-                                      SizedBox(width: 8),
-                                      Text('Cancelar candidatura')
-                                    ],
-                                  ),
+                                  child: Row(children: [
+                                    Icon(Icons.cancel, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('Cancelar candidatura')
+                                  ]),
                                 ),
                               ],
                             ),
                             onTap: () {
                               Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => TelaDetalheVaga(vaga: vaga),
-                                ),
-                              );
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          TelaDetalheVaga(vaga: vaga)));
                             },
                           ),
                         );

@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'instituicao_model.dart';
 
 class VagaInstituicao {
   final int id;
@@ -13,8 +13,10 @@ class VagaInstituicao {
   final String disponibilidade;
   final Instituicao instituicao;
   final DateTime? data;
+  final double? latitude;
+  final double? longitude;
 
-  VagaInstituicao({
+  const VagaInstituicao({
     required this.id,
     required this.cargo,
     required this.localidade,
@@ -27,22 +29,22 @@ class VagaInstituicao {
     required this.disponibilidade,
     required this.instituicao,
     this.data,
+    this.latitude,
+    this.longitude,
   });
 
   factory VagaInstituicao.fromJson(Map<String, dynamic>? json) {
-    if (json == null) {
-      throw Exception("JSON de VagaInstituicao está nulo");
-    }
+    if (json == null) throw Exception("JSON de VagaInstituicao é nulo");
 
     return VagaInstituicao(
       id: json['id'] ?? 0,
       cargo: json['cargo'] ?? '',
       localidade: json['localidade'] ?? '',
       descricao: json['descricao'] ?? '',
-      especificacoes: (json['especificacoes'] as List<dynamic>?)
+      especificacoes: (json['especificacoes'] as List?)
               ?.map((e) => e.toString())
               .toList() ??
-          [],
+          const [],
       tipoVaga: json['tipoVaga'] ?? '',
       area: json['area'] ?? '',
       horario: json['horario'] ?? '',
@@ -56,44 +58,25 @@ class VagaInstituicao {
           : (json['dataCandidatura'] != null
               ? DateTime.tryParse(json['dataCandidatura'])
               : null),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'cargo': cargo,
-      'localidade': localidade,
-      'descricao': descricao,
-      'especificacoes': especificacoes,
-      'tipoVaga': tipoVaga,
-      'area': area,
-      'horario': horario,
-      'tempoVoluntariado': tempoVoluntariado,
-      'disponibilidade': disponibilidade,
-      'instituicao': instituicao.toJson(),
-      'data': data?.toIso8601String(),
-    };
-  }
-}
-
-class Instituicao {
-  final int id;
-  final String nome;
-
-  Instituicao({required this.id, required this.nome});
-
-  factory Instituicao.fromJson(Map<String, dynamic> json) {
-    return Instituicao(
-      id: json['id'],
-      nome: json['nome'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nome': nome,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'cargo': cargo,
+        'localidade': localidade,
+        'descricao': descricao,
+        'especificacoes': especificacoes,
+        'tipoVaga': tipoVaga,
+        'area': area,
+        'horario': horario,
+        'tempoVoluntariado': tempoVoluntariado,
+        'disponibilidade': disponibilidade,
+        'instituicao': instituicao.toJson(),
+        'data': data?.toIso8601String(),
+        'latitude': latitude,
+        'longitude': longitude,
+      };
 }

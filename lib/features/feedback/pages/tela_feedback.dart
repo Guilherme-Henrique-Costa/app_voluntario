@@ -1,27 +1,37 @@
-import 'package:app_voluntario/features/feedback/models/feedback.dart';
-import 'package:app_voluntario/features/feedback/services/feedback_service.dart';
 import 'package:flutter/material.dart';
+import '../models/feedback_model.dart';
+import '../services/feedback_service.dart';
 
 class TelaFeedback extends StatefulWidget {
+  const TelaFeedback({super.key});
+
   @override
-  _TelaFeedbackState createState() => _TelaFeedbackState();
+  State<TelaFeedback> createState() => _TelaFeedbackState();
 }
 
 class _TelaFeedbackState extends State<TelaFeedback> {
   final _formKey = GlobalKey<FormState>();
   final _mensagemController = TextEditingController();
+  bool _enviando = false;
 
   Future<void> _enviarFeedback() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final feedback = FeedbackModel(mensagem: _mensagemController.text.trim());
-      await FeedbackService.salvarFeedback(feedback);
+    if (!_formKey.currentState!.validate()) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Feedback enviado com sucesso!')),
-      );
+    setState(() => _enviando = true);
 
-      _mensagemController.clear();
-    }
+    final feedback = FeedbackModel(mensagem: _mensagemController.text.trim());
+    await FeedbackService.salvarFeedback(feedback);
+
+    setState(() => _enviando = false);
+    _mensagemController.clear();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Feedback enviado com sucesso!'),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
@@ -30,13 +40,11 @@ class _TelaFeedbackState extends State<TelaFeedback> {
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          'Enviar Feedback',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Enviar Feedback',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -50,16 +58,15 @@ class _TelaFeedbackState extends State<TelaFeedback> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Container(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.deepPurple[800],
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
+                      color: Colors.black26,
+                      blurRadius: 8,
+                      offset: Offset(0, 4)),
                 ],
               ),
               child: Form(
@@ -67,18 +74,19 @@ class _TelaFeedbackState extends State<TelaFeedback> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Essa tela é para você enviar um feedback sobre o seu trabalho voluntário, experiências ou sugestões de melhoria, direcionado para a instituição responsável.',
-                      style: TextStyle(color: Colors.white),
+                    const Text(
+                      'Envie um feedback sobre sua experiência ou sugestões de melhoria. '
+                      'Seu comentário será enviado para a instituição responsável.',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _mensagemController,
                       maxLines: 5,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Digite seu feedback...',
-                        labelStyle: TextStyle(color: Colors.white),
+                        labelStyle: const TextStyle(color: Colors.white),
                         filled: true,
                         fillColor: Colors.deepPurple[600],
                         border: OutlineInputBorder(
@@ -92,20 +100,26 @@ class _TelaFeedbackState extends State<TelaFeedback> {
                         return null;
                       },
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     Center(
                       child: ElevatedButton(
-                        onPressed: _enviarFeedback,
+                        onPressed: _enviando ? null : _enviarFeedback,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.amber,
                           foregroundColor: Colors.deepPurple,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 14),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 48,
+                            vertical: 14,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: Text('Enviar'),
+                        child: _enviando
+                            ? const CircularProgressIndicator(
+                                color: Colors.deepPurple)
+                            : const Text('Enviar',
+                                style: TextStyle(fontSize: 18)),
                       ),
                     ),
                   ],

@@ -1,9 +1,11 @@
-import 'package:app_voluntario/features/vagas/services/vaga_instituicao_service.dart';
 import 'package:flutter/material.dart';
+
 import '../models/vaga_instituicao_model.dart';
+import '../services/vaga_instituicao_service.dart';
 
 class VagaInstituicaoProvider with ChangeNotifier {
   final VagaInstituicaoService _service = VagaInstituicaoService();
+
   List<VagaInstituicao> _vagas = [];
   bool _carregando = false;
   String? _erro;

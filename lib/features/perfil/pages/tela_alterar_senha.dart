@@ -1,45 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../services/voluntario_service.dart';
 
 class TelaAlterarSenha extends StatefulWidget {
   @override
-  _TelaAlterarSenhaState createState() => _TelaAlterarSenhaState();
+  State<TelaAlterarSenha> createState() => _TelaAlterarSenhaState();
 }
 
 class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _novaSenhaController = TextEditingController();
-  final _confirmarSenhaController = TextEditingController();
-  bool _obscureSenha = true;
+  final _emailCtrl = TextEditingController();
+  final _novaSenhaCtrl = TextEditingController();
+  final _confirmarCtrl = TextEditingController();
+
+  final _service = VoluntarioService();
+  bool _oculto = true;
   bool _carregando = false;
 
-  void _alterarSenha() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Senha alterada com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
+  Future<void> _alterarSenha() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _carregando = true);
+    final resultado = await _service.redefinirSenha(
+        _emailCtrl.text.trim(), _novaSenhaCtrl.text.trim());
+    setState(() => _carregando = false);
+
+    final sucesso = resultado['sucesso'] == true;
+    _showSnack(resultado['mensagem'] ?? '', sucesso);
   }
 
-  Future<void> _enviarSolicitacao() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _carregando = true);
-
-      await Future.delayed(Duration(seconds: 2)); // Simula carregamento
-
-      setState(() => _carregando = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Instruções enviadas para seu e-mail."),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
+  void _showSnack(String msg, bool sucesso) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(msg),
+          backgroundColor: sucesso ? Colors.green : Colors.red),
+    );
   }
 
   @override
@@ -47,86 +42,11 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
     return Scaffold(
       body: Stack(
         children: [
-          // Fundo gradiente
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.deepPurple.shade300,
-                  Colors.deepPurple.shade900
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
+          Container(decoration: _background()),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple[800],
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icon/icone_app2.svg',
-                        width: 100,
-                        height: 100,
-                        color: Colors.white,
-                      ),
-                      SizedBox(height: 24),
-                      _campoTexto(_emailController, 'E-mail institucional'),
-                      SizedBox(height: 16),
-                      _campoSenha(_novaSenhaController, 'Nova senha'),
-                      SizedBox(height: 16),
-                      _campoSenha(
-                          _confirmarSenhaController, 'Confirmar nova senha'),
-                      SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: _carregando ? null : _alterarSenha,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
-                          minimumSize: Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: _carregando
-                            ? CircularProgressIndicator(
-                                color: Colors.deepPurple)
-                            : Text(
-                                'Alterar Senha',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.deepPurple),
-                              ),
-                      ),
-                      SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Voltar ao login
-                        },
-                        child: Text(
-                          'Voltar ao login',
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: _formAlterar(),
             ),
           ),
         ],
@@ -134,56 +54,103 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
     );
   }
 
-  Widget _campoTexto(TextEditingController controller, String label) {
+  Widget _formAlterar() => Form(
+        key: _formKey,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple[800],
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset('assets/icon/icone_app2.svg',
+                  width: 100, height: 100, color: Colors.white),
+              const SizedBox(height: 24),
+              _campo(_emailCtrl, 'E-mail institucional'),
+              const SizedBox(height: 16),
+              _campoSenha(_novaSenhaCtrl, 'Nova senha'),
+              const SizedBox(height: 16),
+              _campoSenha(_confirmarCtrl, 'Confirmar nova senha'),
+              const SizedBox(height: 24),
+              _botaoAlterar(),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Voltar ao login',
+                    style: TextStyle(color: Colors.white70)),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _campo(TextEditingController ctrl, String label) {
     return TextFormField(
-      controller: controller,
-      style: TextStyle(color: Colors.white),
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Campo obrigatório';
-        if (!value.contains('@')) return 'E-mail inválido';
+      controller: ctrl,
+      style: const TextStyle(color: Colors.white),
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Campo obrigatório';
+        if (!v.contains('@')) return 'E-mail inválido';
         return null;
       },
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white70),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: Colors.white24,
-      ),
+      decoration: _decoracao(label),
     );
   }
 
-  Widget _campoSenha(TextEditingController controller, String label) {
+  Widget _campoSenha(TextEditingController ctrl, String label) {
     return TextFormField(
-      controller: controller,
-      obscureText: _obscureSenha,
-      style: TextStyle(color: Colors.white),
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Campo obrigatório';
-        if (label == 'Confirmar nova senha' &&
-            value != _novaSenhaController.text) {
+      controller: ctrl,
+      obscureText: _oculto,
+      style: const TextStyle(color: Colors.white),
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Campo obrigatório';
+        if (label.contains('Confirmar') && v != _novaSenhaCtrl.text) {
           return 'As senhas não coincidem';
         }
         return null;
       },
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white70),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: Colors.white24,
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscureSenha ? Icons.visibility : Icons.visibility_off,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            setState(() {
-              _obscureSenha = !_obscureSenha;
-            });
-          },
-        ),
-      ),
+      decoration: _decoracao(label, senha: true),
     );
   }
+
+  InputDecoration _decoracao(String label, {bool senha = false}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      filled: true,
+      fillColor: Colors.white24,
+      suffixIcon: senha
+          ? IconButton(
+              icon: Icon(_oculto ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.white),
+              onPressed: () => setState(() => _oculto = !_oculto),
+            )
+          : null,
+    );
+  }
+
+  Widget _botaoAlterar() => ElevatedButton(
+        onPressed: _carregando ? null : _alterarSenha,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.amber,
+          minimumSize: const Size(double.infinity, 50),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        ),
+        child: _carregando
+            ? const CircularProgressIndicator(color: Colors.deepPurple)
+            : const Text('Alterar Senha',
+                style: TextStyle(fontSize: 18, color: Colors.deepPurple)),
+      );
+
+  BoxDecoration _background() => BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.deepPurple.shade300, Colors.deepPurple.shade900],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      );
 }

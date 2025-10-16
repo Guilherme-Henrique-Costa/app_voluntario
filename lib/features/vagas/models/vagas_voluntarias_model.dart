@@ -1,6 +1,5 @@
-import 'dart:convert';
-import 'vaga_instituicao_model.dart';
 import '../../perfil/models/voluntario.dart';
+import 'vaga_instituicao_model.dart';
 
 class VagasVoluntarias {
   final int id;
@@ -8,7 +7,7 @@ class VagasVoluntarias {
   final Voluntario? voluntario;
   final DateTime dataCandidatura;
 
-  VagasVoluntarias({
+  const VagasVoluntarias({
     required this.id,
     required this.vaga,
     required this.dataCandidatura,
@@ -19,7 +18,8 @@ class VagasVoluntarias {
     if (json == null) throw Exception("JSON nulo para VagasVoluntarias");
 
     final vagaJson = json['vaga'];
-    if (vagaJson == null) throw Exception("Vaga nula em VagasVoluntarias");
+    if (vagaJson == null)
+      throw Exception("Campo 'vaga' nulo em VagasVoluntarias");
 
     return VagasVoluntarias(
       id: json['id'] ?? 0,

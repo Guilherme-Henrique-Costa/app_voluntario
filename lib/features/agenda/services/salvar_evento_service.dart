@@ -1,48 +1,58 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
+/// Serviço para salvar e recuperar eventos da agenda localmente.
+///
+/// Usa o FlutterSecureStorage para persistência local segura.
 class EventoService {
-  static const _chaveEventos = 'eventos_agenda';
+  static const _keyEventos = 'eventos_agenda';
+  static final _storage = FlutterSecureStorage();
 
-  static Future<Map<DateTime, List<Map<String, dynamic>>>>
-      carregarEventos() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_chaveEventos);
-    if (jsonString == null) return {};
-
-    final Map<String, dynamic> jsonMap = json.decode(jsonString);
-    return jsonMap.map((dataStr, listaEventos) {
-      final data = DateTime.parse(dataStr);
-      final eventos = (listaEventos as List).cast<Map<String, dynamic>>();
-      return MapEntry(data, eventos);
-    });
-  }
-
-  static Future<void> salvarEventos(
-      Map<DateTime, List<Map<String, dynamic>>> eventos) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonMap =
-        eventos.map((data, lista) => MapEntry(data.toIso8601String(), lista));
-    final jsonString = json.encode(jsonMap);
-    await prefs.setString(_chaveEventos, jsonString);
-  }
-
+  /// Salva um novo evento na agenda.
+  ///
+  /// [dia] é a data do evento (usada como chave de agrupamento)
+  /// [evento] é um Map com os campos: descrição, horário, status, cidade, latitude e longitude.
   Future<void> adicionarEvento(
       DateTime dia, Map<String, dynamic> evento) async {
-    final eventos = await EventoService.carregarEventos();
-    eventos.putIfAbsent(dia, () => []);
-    eventos[dia]!.add(evento);
-    await EventoService.salvarEventos(eventos);
+    final dataFormatada =
+        dia.toIso8601String().split('T').first; // apenas yyyy-MM-dd
+    final dados = await _storage.read(key: _keyEventos);
+
+    // Recupera os eventos existentes
+    Map<String, List<Map<String, dynamic>>> agenda = {};
+    if (dados != null) {
+      final decoded = jsonDecode(dados);
+      agenda = Map<String, List<Map<String, dynamic>>>.from(
+        decoded.map((key, value) => MapEntry(
+              key,
+              List<Map<String, dynamic>>.from(value),
+            )),
+      );
+    }
+
+    // Adiciona o novo evento no dia correspondente
+    agenda.putIfAbsent(dataFormatada, () => []);
+    agenda[dataFormatada]!.add(evento);
+
+    // Persiste a agenda atualizada
+    await _storage.write(key: _keyEventos, value: jsonEncode(agenda));
   }
 
-  Future<void> deletarEvento(DateTime dia, int index) async {
-    final eventos = await EventoService.carregarEventos();
-    if (eventos.containsKey(dia)) {
-      eventos[dia]!.removeAt(index);
-      if (eventos[dia]!.isEmpty) {
-        eventos.remove(dia);
-      }
-      await EventoService.salvarEventos(eventos);
-    }
+  /// Retorna todos os eventos salvos.
+  Future<Map<String, List<Map<String, dynamic>>>> listarEventos() async {
+    final dados = await _storage.read(key: _keyEventos);
+    if (dados == null) return {};
+    final decoded = jsonDecode(dados);
+    return Map<String, List<Map<String, dynamic>>>.from(
+      decoded.map((key, value) => MapEntry(
+            key,
+            List<Map<String, dynamic>>.from(value),
+          )),
+    );
+  }
+
+  /// Remove todos os eventos (usado para testes ou reset).
+  Future<void> limparEventos() async {
+    await _storage.delete(key: _keyEventos);
   }
 }

@@ -11,13 +11,13 @@ class RecomendacaoModel {
 
   factory RecomendacaoModel.fromJson(Map<String, dynamic> json) {
     return RecomendacaoModel(
-      vagasRecomendadas: (json['vagasRecomendadas'] as List)
+      vagasRecomendadas: (json['vagasRecomendadas'] as List? ?? [])
           .map((e) => VagaRecomendada.fromJson(e))
           .toList(),
-      recompensasProximas: (json['recompensasProximas'] as List)
+      recompensasProximas: (json['recompensasProximas'] as List? ?? [])
           .map((e) => RecompensaProxima.fromJson(e))
           .toList(),
-      causasMaisEngajadas: (json['causasMaisEngajadas'] as List)
+      causasMaisEngajadas: (json['causasMaisEngajadas'] as List? ?? [])
           .map((e) => CausaEngajada.fromJson(e))
           .toList(),
     );
@@ -39,10 +39,10 @@ class VagaRecomendada {
 
   factory VagaRecomendada.fromJson(Map<String, dynamic> json) {
     return VagaRecomendada(
-      id: json['id'],
-      titulo: json['titulo'],
-      causa: json['causa'],
-      localidade: json['localidade'],
+      id: json['id'] ?? 0,
+      titulo: json['titulo'] ?? 'Sem título',
+      causa: json['causa'] ?? 'Não informada',
+      localidade: json['localidade'] ?? 'Local não especificado',
     );
   }
 }
@@ -58,8 +58,8 @@ class RecompensaProxima {
 
   factory RecompensaProxima.fromJson(Map<String, dynamic> json) {
     return RecompensaProxima(
-      titulo: json['titulo'],
-      progresso: json['progresso'],
+      titulo: json['titulo'] ?? 'Recompensa sem nome',
+      progresso: json['progresso'] ?? 0,
     );
   }
 }
@@ -75,8 +75,8 @@ class CausaEngajada {
 
   factory CausaEngajada.fromJson(Map<String, dynamic> json) {
     return CausaEngajada(
-      causa: json['causa'],
-      participacoes: json['participacoes'],
+      causa: json['causa'] ?? 'Causa desconhecida',
+      participacoes: json['participacoes'] ?? 0,
     );
   }
 }

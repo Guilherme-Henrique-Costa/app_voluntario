@@ -44,6 +44,7 @@ class Voluntario {
     this.token,
   });
 
+  /// 🧩 Cria o objeto a partir de um JSON vindo da API
   factory Voluntario.fromJson(Map<String, dynamic> json) {
     return Voluntario(
       id: json['id'],
@@ -51,7 +52,7 @@ class Voluntario {
       nome: json['nome'],
       cpf: json['cpf'],
       dataNascimento: json['dataNascimento'] != null
-          ? DateTime.parse(json['dataNascimento'])
+          ? DateTime.tryParse(json['dataNascimento'])
           : null,
       genero: json['genero'],
       senha: json['senha'],
@@ -75,6 +76,7 @@ class Voluntario {
     );
   }
 
+  /// 🔄 Converte o objeto completo para JSON
   Map<String, dynamic> toJsonCompleto() {
     return {
       'id': id,
@@ -87,7 +89,7 @@ class Voluntario {
       'senha': senha ?? '',
       'atividadeCEUB': atividadeCEUB ?? [],
       'emailInstitucional': emailInstitucional ?? '',
-      'emailParticular': emailParticular ?? '',
+      'emailParticular': emailParticular ?? '', // opcional
       'celular': celular ?? '',
       'cidadeUF': cidadeUF ?? '',
       'horario': horario ?? '',
@@ -100,63 +102,48 @@ class Voluntario {
     };
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nome': nome ?? '',
-    };
-  }
+  /// 🧠 JSON resumido (para uso em listas ou cache leve)
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nome': nome ?? '',
+      };
 
+  /// ✅ Validação dos campos obrigatórios
   bool validarCamposObrigatorios() {
     final cpfRegex = RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$');
     final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}$');
-    final idadeMinima = 16;
+    const idadeMinima = 16;
 
     final idadeValida = dataNascimento != null
         ? DateTime.now().difference(dataNascimento!).inDays ~/ 365 >=
             idadeMinima
         : false;
 
-    print('nome: ${nome?.trim().isNotEmpty}');
-    print('matricula: ${matricula?.trim().isNotEmpty}');
-    print('cpf: ${cpf?.trim().isNotEmpty} && ${cpfRegex.hasMatch(cpf ?? '')}');
-    print('idade: $idadeValida');
-    print('genero: ${genero?.trim().isNotEmpty}');
-    print('senha: ${senha != null && senha!.trim().length >= 6}');
-    print(
-        'emailInstitucional: ${emailInstitucional?.trim().isNotEmpty} && ${emailRegex.hasMatch(emailInstitucional ?? '')}');
-    print(
-        'emailParticular: ${emailParticular?.trim().isNotEmpty} && ${emailRegex.hasMatch(emailParticular ?? '')}');
-    print('celular: ${celular?.trim().isNotEmpty}');
-    print('cidadeUF: ${cidadeUF?.trim().isNotEmpty}');
-    print(
-        'atividadeCEUB: ${atividadeCEUB != null && atividadeCEUB!.isNotEmpty}');
-    print('causas: ${causas != null && causas!.isNotEmpty}');
-    print('habilidades: ${habilidades != null && habilidades!.isNotEmpty}');
-    print(
-        'disponibilidadeSemanal: ${disponibilidadeSemanal != null && disponibilidadeSemanal!.isNotEmpty}');
-
-    return nome?.trim().isNotEmpty == true &&
-        matricula?.trim().isNotEmpty == true &&
-        cpf?.trim().isNotEmpty == true &&
-        cpfRegex.hasMatch(cpf!) &&
+    return _campoPreenchido(nome) &&
+        _campoPreenchido(matricula) &&
+        _campoPreenchido(cpf) &&
+        cpfRegex.hasMatch(cpf ?? '') &&
         idadeValida &&
-        genero?.trim().isNotEmpty == true &&
-        senha != null &&
-        senha!.trim().length >= 6 &&
-        emailInstitucional?.trim().isNotEmpty == true &&
-        emailRegex.hasMatch(emailInstitucional!) &&
-        emailParticular?.trim().isNotEmpty == true &&
-        emailRegex.hasMatch(emailParticular!) &&
-        celular?.trim().isNotEmpty == true &&
-        cidadeUF?.trim().isNotEmpty == true &&
-        atividadeCEUB != null &&
-        atividadeCEUB!.isNotEmpty &&
-        causas != null &&
-        causas!.isNotEmpty &&
-        habilidades != null &&
-        habilidades!.isNotEmpty &&
-        disponibilidadeSemanal != null &&
-        disponibilidadeSemanal!.isNotEmpty;
+        _campoPreenchido(genero) &&
+        _senhaValida(senha) &&
+        _emailValido(emailInstitucional, emailRegex) &&
+        _campoPreenchido(celular) &&
+        _campoPreenchido(cidadeUF) &&
+        _listaValida(atividadeCEUB) &&
+        _listaValida(causas) &&
+        _listaValida(habilidades) &&
+        _listaValida(disponibilidadeSemanal);
   }
+
+  /// --- 🔽 Métodos utilitários privados (ajudam a manter o código limpo) ---
+
+  bool _campoPreenchido(String? valor) =>
+      valor != null && valor.trim().isNotEmpty;
+
+  bool _listaValida(List<String>? lista) => lista != null && lista.isNotEmpty;
+
+  bool _emailValido(String? email, RegExp regex) =>
+      _campoPreenchido(email) && regex.hasMatch(email ?? '');
+
+  bool _senhaValida(String? senha) => senha != null && senha.trim().length >= 6;
 }
