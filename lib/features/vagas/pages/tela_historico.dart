@@ -1,202 +1,156 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/app_theme.dart';
+import '../../../core/constants/storage_service.dart';
+import '../models/vaga_candidatada_model.dart';
+import '../services/candidatura_service.dart';
+import '../widgets/card_vaga_historico.dart';
+
 class TelaHistorico extends StatefulWidget {
+  const TelaHistorico({super.key});
+
   @override
-  _TelaHistoricoState createState() => _TelaHistoricoState();
+  State<TelaHistorico> createState() => _TelaHistoricoState();
 }
 
 class _TelaHistoricoState extends State<TelaHistorico> {
-  String filtroStatus = 'Todos';
-  String filtroInstituicao = 'Todas';
-  bool ordenarPorDataAsc = false;
+  late Future<List<VagaCandidatada>> _futureCandidaturas;
 
-  final List<Map<String, dynamic>> todasAsVagas = [
-    {
-      'titulo': 'Distribuição de Alimentos',
-      'cargo': 'Ajudante Geral',
-      'localidade': 'Centro Comunitário - Brasília',
-      'descricao': 'Ajuda na entrega de cestas básicas.',
-      'especificacoes': ['Ser pontual', 'Capacidade física para carregar peso'],
-      'data': '2025-05-10',
-      'status': 'Concluído',
-      'instituicao': 'Cruz Vermelha'
-    },
-    {
-      'titulo': 'Campanha de Doação de Sangue',
-      'cargo': 'Auxiliar de Triagem',
-      'localidade': 'Hospital Vida - Taguatinga',
-      'descricao': 'Triagem e orientação.',
-      'especificacoes': ['Boa comunicação', 'Conhecimento básico em saúde'],
-      'data': '2025-04-22',
-      'status': 'Concluído',
-      'instituicao': 'Hospital Vida'
-    },
-    {
-      'titulo': 'Mutirão de Limpeza',
-      'cargo': 'Voluntário de Limpeza',
-      'localidade': 'Praça Central',
-      'descricao': 'Limpeza de praça pública.',
-      'especificacoes': ['Levar luvas', 'Estar disponível no sábado'],
-      'data': '2025-03-15',
-      'status': 'Concluído',
-      'instituicao': 'Prefeitura Local'
-    },
-    {
-      'titulo': 'Apoio em Eventos Comunitários',
-      'cargo': 'Organizador de Eventos',
-      'localidade': 'Quadra 301 Norte',
-      'descricao': 'Organização de filas e auxílio logístico.',
-      'especificacoes': ['Ser proativo', 'Boa comunicação'],
-      'data': '2025-07-01',
-      'status': 'Candidatado',
-      'instituicao': 'Cruz Vermelha'
-    },
-    {
-      'titulo': 'Voluntário de Comunicação',
-      'cargo': 'Designer Social',
-      'localidade': 'SESC Asa Sul',
-      'descricao': 'Divulgação das ações e cobertura do evento.',
-      'especificacoes': ['Saber usar redes sociais', 'Edição básica de imagem'],
-      'data': '2025-06-15',
-      'status': 'Candidatado',
-      'instituicao': 'ONG Jovem Ação'
-    },
-  ];
-
-  List<String> get instituicoesDisponiveis {
-    final insts =
-        todasAsVagas.map((e) => e['instituicao'] as String).toSet().toList();
-    insts.sort();
-    return ['Todas', ...insts];
+  @override
+  void initState() {
+    super.initState();
+    _futureCandidaturas = _carregarCandidaturas();
   }
 
-  List<Map<String, dynamic>> get vagasFiltradas {
-    List<Map<String, dynamic>> filtradas = todasAsVagas;
-
-    if (filtroStatus != 'Todos') {
-      filtradas = filtradas.where((v) => v['status'] == filtroStatus).toList();
+  Future<List<VagaCandidatada>> _carregarCandidaturas() async {
+    final voluntario = await StorageService.obterAtual();
+    if (voluntario?.id == null) {
+      throw Exception('Voluntário não encontrado.');
     }
-
-    if (filtroInstituicao != 'Todas') {
-      filtradas = filtradas
-          .where((v) => v['instituicao'] == filtroInstituicao)
-          .toList();
-    }
-
-    filtradas.sort((a, b) {
-      DateTime dataA = DateTime.parse(a['data']);
-      DateTime dataB = DateTime.parse(b['data']);
-      return ordenarPorDataAsc
-          ? dataA.compareTo(dataB)
-          : dataB.compareTo(dataA);
-    });
-
-    return filtradas;
-  }
-
-  String formatarData(String data) {
-    final parsed = DateTime.parse(data);
-    return DateFormat('dd/MM/yyyy').format(parsed);
+    return CandidaturaService().buscarCandidaturasDoVoluntario(voluntario!.id!);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Histórico de Voluntariado'),
-        backgroundColor: Colors.deepPurple[900],
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: Icon(
-                ordenarPorDataAsc ? Icons.arrow_upward : Icons.arrow_downward),
-            tooltip: 'Ordenar por data',
-            onPressed: () {
-              setState(() {
-                ordenarPorDataAsc = !ordenarPorDataAsc;
-              });
-            },
-          )
-        ],
+        title: const Text('Histórico de Candidaturas'),
+        centerTitle: true,
+        backgroundColor: AppColors.primary,
       ),
-      body: Column(
-        children: [
-          // Filtros
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                DropdownButton<String>(
-                  value: filtroStatus,
-                  onChanged: (value) {
-                    setState(() {
-                      filtroStatus = value!;
-                    });
-                  },
-                  items: ['Todos', 'Candidatado', 'Concluído']
-                      .map((s) => DropdownMenuItem(
-                            value: s,
-                            child: Text(s),
-                          ))
-                      .toList(),
-                ),
-                DropdownButton<String>(
-                  value: filtroInstituicao,
-                  onChanged: (value) {
-                    setState(() {
-                      filtroInstituicao = value!;
-                    });
-                  },
-                  items: instituicoesDisponiveis
-                      .map((inst) => DropdownMenuItem(
-                            value: inst,
-                            child: Text(inst),
-                          ))
-                      .toList(),
-                ),
-              ],
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFFAF5FF),
+              Color(0xFFE4D9FF),
+              Color(0xFFD1C0FF),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
+        ),
+        child: FutureBuilder<List<VagaCandidatada>>(
+          future: _futureCandidaturas,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child:
+                    Lottie.asset('assets/animations/loading.json', height: 120),
+              );
+            }
 
-          // Lista
-          Expanded(
-            child: vagasFiltradas.isEmpty
-                ? Center(child: Text('Nenhuma vaga encontrada.'))
-                : ListView.builder(
-                    itemCount: vagasFiltradas.length,
-                    padding: EdgeInsets.all(16),
-                    itemBuilder: (context, index) {
-                      final vaga = vagasFiltradas[index];
-                      final especificacoes =
-                          List<String>.from(vaga['especificacoes']);
+            if (snapshot.hasError) {
+              return _erro(snapshot.error.toString());
+            }
 
-                      return Card(
-                        child: ListTile(
-                          title: Text(vaga['titulo']),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Cargo: ${vaga['cargo']}'),
-                              Text('Localidade: ${vaga['localidade']}'),
-                              Text('Descrição: ${vaga['descricao']}'),
-                              Text('Instituição: ${vaga['instituicao']}'),
-                              Text('Status: ${vaga['status']}'),
-                              Text('Data: ${formatarData(vaga['data'])}'),
-                              SizedBox(height: 6),
-                              Text('Especificações:'),
-                              ...especificacoes.map((item) => Text('- $item')),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+            final candidaturas = snapshot.data ?? [];
+            if (candidaturas.isEmpty) {
+              return _semDados();
+            }
+
+            // Ordena por data de candidatura (mais recentes primeiro)
+            candidaturas.sort((a, b) {
+              final dataA = a.dataCandidatura ?? DateTime(1900);
+              final dataB = b.dataCandidatura ?? DateTime(1900);
+              return dataB.compareTo(dataA);
+            });
+
+            return _listaCandidaturas(candidaturas);
+          },
+        ),
+      ),
+    );
+  }
+
+  // ==================== COMPONENTES ====================
+
+  Widget _erro(String erro) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset('assets/animations/error.json', height: 140),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Erro ao carregar histórico:\n$erro',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textDark,
+                    height: 1.4,
                   ),
-          ),
-        ],
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ElevatedButton.icon(
+              onPressed: () =>
+                  setState(() => _futureCandidaturas = _carregarCandidaturas()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _semDados() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            'Você ainda não se candidatou a nenhuma vaga 🌱',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textLight.withOpacity(0.8),
+                  height: 1.4,
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _listaCandidaturas(List<VagaCandidatada> candidaturas) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      itemCount: candidaturas.length,
+      itemBuilder: (context, i) {
+        final vaga = candidaturas[i];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: CardVagaHistorico(vaga: vaga),
+        );
+      },
     );
   }
 }

@@ -6,9 +6,6 @@ import '../models/vaga_candidatada_model.dart';
 
 /// Serviço responsável por gerenciar candidaturas (criar, cancelar, listar, verificar).
 class CandidaturaService {
-  /// Envia uma candidatura.
-  ///
-  /// Retorna `true` se o envio for bem-sucedido, `false` caso contrário.
   Future<bool> candidatar({
     required int vagaId,
     required int voluntarioId,
@@ -40,14 +37,44 @@ class CandidaturaService {
   Future<List<VagaCandidatada>> buscarCandidaturasDoVoluntario(
       int voluntarioId) async {
     final url = Uri.parse('$baseUrl/vagasCandidatadas/$voluntarioId');
-    log('📡 [GET] $url');
+    print('📡 [GET] $url');
 
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      log('✅ Recebidas ${data.length} candidaturas');
-      return data.map((e) => VagaCandidatada.fromJson(e)).toList();
+      print('✅ Recebidas ${data.length} candidaturas');
+
+      // ✅ Log dos campos para depuração
+      if (data.isNotEmpty) {
+        print('🔎 Exemplo de resposta: ${data.first}');
+      }
+
+      // ✅ Agora mapeamos o status também
+      return data.map((e) {
+        final vaga = VagaCandidatada.fromJson(e);
+        return VagaCandidatada(
+          id: vaga.id,
+          cargo: vaga.cargo,
+          localidade: vaga.localidade,
+          descricao: vaga.descricao,
+          especificacoes: vaga.especificacoes,
+          tipoVaga: vaga.tipoVaga,
+          area: vaga.area,
+          horario: vaga.horario,
+          tempoVoluntariado: vaga.tempoVoluntariado,
+          disponibilidade: vaga.disponibilidade,
+          instituicao: vaga.instituicao,
+          dataCandidatura: vaga.dataCandidatura,
+          latitude: vaga.latitude,
+          longitude: vaga.longitude,
+          cidade: vaga.cidade,
+          status: e['status'] ??
+              e['situacao'] ??
+              e['estado'] ??
+              'Desconhecido', // ✅ campo status garantido
+        );
+      }).toList();
     } else {
       throw Exception('Erro ao buscar candidaturas: ${response.statusCode}');
     }

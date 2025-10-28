@@ -20,7 +20,7 @@ import 'package:app_voluntario/features/recompensa/pages/tela_recompensa.dart';
 import 'package:app_voluntario/features/recompensa/pages/tela_conquistas.dart';
 import 'package:app_voluntario/features/recompensa/pages/tela_historico_recompensa.dart';
 
-// Feedbacks
+// Feedback
 import 'package:app_voluntario/features/feedback/pages/tela_feedback.dart';
 import 'package:app_voluntario/features/feedback/pages/tela_lista_feedback.dart';
 
@@ -31,37 +31,82 @@ import 'package:app_voluntario/features/recomendacoes/pages/tela_recomendacoes.d
 import 'package:app_voluntario/features/dashboard/pages/tela_dashboard.dart';
 
 // Home
-import 'package:app_voluntario/home/tela_inicial.dart';
+import 'package:app_voluntario/home/pages/tela_inicial.dart';
 
-final Map<String, WidgetBuilder> rotas = {
-  // Autenticação
-  '/login': (_) => TelaLogin(),
-  '/cadastro': (_) => TelaCadastroVoluntario(),
+class Rotas {
+  // 🔑 Definições nomeadas
+  static const login = '/login';
+  static const cadastro = '/cadastro';
 
-  // Inicial e Perfil
-  '/inicial': (_) => const TelaInicial(),
-  '/perfil': (_) => const TelaPerfil(),
-  '/editar_perfil': (_) => const TelaEditarPerfil(),
-  '/alterar_senha': (_) => TelaAlterarSenha(),
+  static const inicial = '/inicial';
+  static const perfil = '/perfil';
+  static const editarPerfil = '/editar_perfil';
+  static const alterarSenha = '/alterar_senha';
 
-  // Agenda e Vagas
-  '/agenda': (_) => TelaAgenda(),
-  '/vagas': (_) => TelaVagas(),
-  '/minhas_vagas': (_) => TelaMinhasVagas(),
-  '/historico': (_) => TelaHistorico(),
+  static const agenda = '/agenda';
+  static const vagas = '/vagas';
+  static const minhasVagas = '/minhas_vagas';
+  static const historico = '/historico';
 
-  // 🏆 Recompensas
-  '/recompensa': (_) => TelaRecompensa(),
-  '/historico_recompensas': (_) => TelaHistoricoRecompensas(),
-  '/conquistas': (_) => TelaConquistas(),
+  static const recompensa = '/recompensa';
+  static const historicoRecompensas = '/historico_recompensas';
+  static const conquistas = '/conquistas';
 
-  // Feedback
-  '/feedback': (_) => TelaFeedback(),
-  '/feedbacks': (_) => TelaListaFeedbacks(),
+  static const feedback = '/feedback';
+  static const feedbacks = '/feedbacks';
 
-  // Dashboard
-  '/dashboard': (_) => const TelaDashboard(),
+  static const dashboard = '/dashboard';
+  static const recomendacoes = '/recomendacoes';
 
-  // Recomendações
-  '/recomendacoes': (_) => TelaRecomendacoes(),
-};
+  static final Map<String, WidgetBuilder> mapa = {
+    // Autenticação
+    login: (_) => TelaLogin(),
+    cadastro: (_) => TelaCadastroVoluntario(),
+
+    // Inicial e Perfil
+    inicial: (_) => const TelaInicial(),
+    perfil: (_) => const TelaPerfil(),
+    editarPerfil: (_) => const TelaEditarPerfil(),
+    alterarSenha: (_) => TelaAlterarSenha(),
+
+    // Agenda e Vagas
+    agenda: (_) => const TelaAgenda(),
+    vagas: (_) => const TelaVagas(),
+    minhasVagas: (_) => const TelaMinhasVagas(),
+    historico: (_) => TelaHistorico(),
+
+    // Recompensas
+    recompensa: (_) => TelaRecompensa(),
+    historicoRecompensas: (_) => TelaHistoricoRecompensas(),
+    conquistas: (_) => TelaConquistas(),
+
+    // Feedback
+    feedback: (_) => const TelaFeedback(),
+    feedbacks: (_) => const TelaListaFeedbacks(),
+
+    // Dashboard
+    dashboard: (_) => const TelaDashboard(),
+
+    // Recomendação Inteligente
+    recomendacoes: (_) => const TelaRecomendacoes(),
+  };
+
+  static Route<dynamic> gerarRota(RouteSettings settings) {
+    final builder = mapa[settings.name];
+    if (builder != null) {
+      return MaterialPageRoute(builder: builder, settings: settings);
+    }
+
+    // Caso a rota não exista → fallback amigável
+    return MaterialPageRoute(
+      builder: (_) => const Scaffold(
+        body: Center(
+          child: Text(
+            '❌ Página não encontrada',
+            style: TextStyle(fontSize: 18, color: Colors.redAccent),
+          ),
+        ),
+      ),
+    );
+  }
+}

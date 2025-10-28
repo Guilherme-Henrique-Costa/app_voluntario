@@ -1,9 +1,27 @@
 class RecomendacaoModel {
+  final int id;
+  final String cargo;
+  final String descricao;
+  final String localidade;
+  final String instituicao;
+  final String tipoVaga;
+  final String area;
+  final String disponibilidade;
+  final String status;
   final List<VagaRecomendada> vagasRecomendadas;
   final List<RecompensaProxima> recompensasProximas;
   final List<CausaEngajada> causasMaisEngajadas;
 
   RecomendacaoModel({
+    required this.id,
+    required this.cargo,
+    required this.descricao,
+    required this.localidade,
+    required this.instituicao,
+    required this.tipoVaga,
+    required this.area,
+    required this.disponibilidade,
+    required this.status,
     required this.vagasRecomendadas,
     required this.recompensasProximas,
     required this.causasMaisEngajadas,
@@ -11,15 +29,27 @@ class RecomendacaoModel {
 
   factory RecomendacaoModel.fromJson(Map<String, dynamic> json) {
     return RecomendacaoModel(
-      vagasRecomendadas: (json['vagasRecomendadas'] as List? ?? [])
-          .map((e) => VagaRecomendada.fromJson(e))
-          .toList(),
-      recompensasProximas: (json['recompensasProximas'] as List? ?? [])
-          .map((e) => RecompensaProxima.fromJson(e))
-          .toList(),
-      causasMaisEngajadas: (json['causasMaisEngajadas'] as List? ?? [])
-          .map((e) => CausaEngajada.fromJson(e))
-          .toList(),
+      id: json['id'] ?? 0,
+      cargo: json['cargo'] ?? '',
+      descricao: json['descricao'] ?? '',
+      localidade: json['localidade'] ?? '',
+      instituicao: json['instituicao'] != null
+          ? json['instituicao']['nome'] ?? ''
+          : 'Instituição não informada',
+      tipoVaga: json['tipoVaga'] ?? '',
+      area: json['area'] ?? '',
+      disponibilidade: json['disponibilidade'] ?? '',
+      status: json['status'] ?? '',
+      vagasRecomendadas: [
+        VagaRecomendada(
+          id: json['id'] ?? 0,
+          titulo: json['cargo'] ?? 'Sem título',
+          causa: json['area'] ?? 'Não informada',
+          localidade: json['localidade'] ?? 'Local não especificado',
+        )
+      ],
+      recompensasProximas: const [],
+      causasMaisEngajadas: const [],
     );
   }
 }

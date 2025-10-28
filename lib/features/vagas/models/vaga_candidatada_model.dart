@@ -16,6 +16,7 @@ class VagaCandidatada {
   final double? latitude;
   final double? longitude;
   final String? cidade;
+  final String? status;
 
   const VagaCandidatada({
     required this.id,
@@ -33,6 +34,7 @@ class VagaCandidatada {
     this.latitude,
     this.longitude,
     this.cidade,
+    this.status,
   });
 
   factory VagaCandidatada.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,29 @@ class VagaCandidatada {
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       cidade: json['cidade'],
+      status: json['status'] ??
+          json['situacao'] ??
+          json['estado'] ??
+          'Desconhecido',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'cargo': cargo,
+        'localidade': localidade,
+        'descricao': descricao,
+        'especificacoes': especificacoes,
+        'tipoVaga': tipoVaga,
+        'area': area,
+        'horario': horario,
+        'tempoVoluntariado': tempoVoluntariado,
+        'disponibilidade': disponibilidade,
+        'instituicao': instituicao.toJson(),
+        'dataCandidatura': dataCandidatura?.toIso8601String(),
+        'latitude': latitude,
+        'longitude': longitude,
+        'cidade': cidade,
+        'status': status,
+      };
 }

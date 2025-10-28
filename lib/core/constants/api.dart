@@ -3,7 +3,7 @@
 /// Este arquivo centraliza todos os endpoints usados pela aplicação.
 /// Assim, qualquer alteração no IP/porta/baseUrl é feita em um único lugar.
 
-const String baseUrl = 'http://192.168.0.127:8080/api/v1';
+const String baseUrl = 'http://192.168.0.111:8080/api/v1';
 
 class ApiEndpoints {
   static const String voluntarios = '$baseUrl/voluntario';
