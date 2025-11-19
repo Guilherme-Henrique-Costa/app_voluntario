@@ -139,7 +139,7 @@ class DetalheVagaBase extends StatelessWidget {
   Widget _cardInfo(BuildContext context, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),

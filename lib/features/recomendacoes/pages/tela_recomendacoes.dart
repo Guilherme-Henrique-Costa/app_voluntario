@@ -1,12 +1,13 @@
-import 'package:app_voluntario/core/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/constants/storage_service.dart';
 import '../models/recomendacao_model.dart';
 import '../services/recomendacao_service.dart';
 import '../widgets/card_vaga.dart';
 import '../widgets/card_recompensa.dart';
 import '../widgets/card_causa.dart';
+import '../widgets/secao_titulo.dart';
 
 class TelaRecomendacoes extends StatefulWidget {
   const TelaRecomendacoes({super.key});
@@ -37,14 +38,14 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recomendações Inteligentes'),
+        backgroundColor: AppColors.primary,
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.primary.withOpacity(0.85),
               AppColors.primary,
-              Colors.deepPurple.shade900,
+              AppColors.primaryDark,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -55,8 +56,10 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
-                child:
-                    Lottie.asset('assets/animations/loading.json', height: 120),
+                child: Lottie.asset(
+                  'assets/animations/loading.json',
+                  height: 120,
+                ),
               );
             }
 
@@ -77,7 +80,7 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
     );
   }
 
-  // ==================== COMPONENTES ====================
+  // ==================== ESTADOS DE TELA ====================
 
   Widget _buildErro(String mensagem) {
     return Center(
@@ -90,17 +93,15 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
             const SizedBox(height: AppSpacing.md),
             Text(
               'Erro ao carregar recomendações:\n$mensagem',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textLight,
-                  ),
               textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(color: AppColors.textLight),
             ),
             const SizedBox(height: AppSpacing.md),
-            ElevatedButton(
-              onPressed: () => setState(() {
-                _futureRecomendacoes = _carregarRecomendacoes();
-              }),
-              child: const Text('Tentar novamente'),
+            ElevatedButton.icon(
+              onPressed: () => setState(
+                  () => _futureRecomendacoes = _carregarRecomendacoes()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Tentar novamente'),
             ),
           ],
         ),
@@ -115,21 +116,23 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: AppColors.card.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             'Nenhuma recomendação disponível no momento 🌱',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textLight.withOpacity(0.8),
-                  height: 1.4,
-                ),
+            style: AppTextStyles.body.copyWith(
+              color: AppColors.textLight.withOpacity(0.9),
+              height: 1.4,
+            ),
           ),
         ),
       ),
     );
   }
+
+  // ==================== CONTEÚDO PRINCIPAL ====================
 
   Widget _buildConteudo(RecomendacaoModel dados) {
     return SingleChildScrollView(
@@ -140,21 +143,28 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _secaoTitulo(
+          // 🔹 Seção: Vagas
+          const SecaoTitulo(
             icon: Icons.work_outline,
             titulo: 'Vagas Recomendadas',
           ),
           const SizedBox(height: AppSpacing.md),
           _buildListaVagas(dados.vagasRecomendadas),
+
           const SizedBox(height: AppSpacing.xl),
-          _secaoTitulo(
+
+          // 🔹 Seção: Recompensas
+          const SecaoTitulo(
             icon: Icons.emoji_events_outlined,
             titulo: 'Recompensas Próximas',
           ),
           const SizedBox(height: AppSpacing.md),
           _buildListaRecompensas(dados.recompensasProximas),
+
           const SizedBox(height: AppSpacing.xl),
-          _secaoTitulo(
+
+          // 🔹 Seção: Causas
+          const SecaoTitulo(
             icon: Icons.favorite_border,
             titulo: 'Causas Mais Engajadas',
           ),
@@ -165,48 +175,46 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
     );
   }
 
-  Widget _secaoTitulo({required IconData icon, required String titulo}) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.secondary, size: 22),
-        const SizedBox(width: AppSpacing.sm),
-        Text(
-          titulo,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.secondary,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
-    );
-  }
+  // ==================== CONTEÚDO DAS SEÇÕES ====================
 
   Widget _buildListaVagas(List<VagaRecomendada> vagas) {
     if (vagas.isEmpty) return _mensagemVazia('Nenhuma vaga recomendada');
     return SizedBox(
-      height: 170,
+      height: 180,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: vagas.length,
         separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-        itemBuilder: (context, i) => CardVaga(vaga: vagas[i]),
+        itemBuilder: (_, i) => CardVaga(vaga: vagas[i]),
       ),
     );
   }
 
   Widget _buildListaRecompensas(List<RecompensaProxima> recompensas) {
-    if (recompensas.isEmpty)
+    if (recompensas.isEmpty) {
       return _mensagemVazia('Nenhuma recompensa próxima');
+    }
     return Column(
-      children: recompensas.map((r) => CardRecompensa(recompensa: r)).toList(),
+      children: recompensas
+          .map((r) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: CardRecompensa(recompensa: r),
+              ))
+          .toList(),
     );
   }
 
   Widget _buildListaCausas(List<CausaEngajada> causas) {
-    if (causas.isEmpty)
+    if (causas.isEmpty) {
       return _mensagemVazia('Nenhuma causa engajada encontrada');
+    }
     return Column(
-      children: causas.map((c) => CardCausa(causa: c)).toList(),
+      children: causas
+          .map((c) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: CardCausa(causa: c),
+              ))
+          .toList(),
     );
   }
 
@@ -215,15 +223,15 @@ class _TelaRecomendacoesState extends State<TelaRecomendacoes> {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: AppColors.card.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         texto,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textLight.withOpacity(0.8),
-              fontSize: 14,
-            ),
+        style: AppTextStyles.body.copyWith(
+          color: AppColors.textLight.withOpacity(0.8),
+          fontSize: 14,
+        ),
         textAlign: TextAlign.center,
       ),
     );

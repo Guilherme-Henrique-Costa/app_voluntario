@@ -1,6 +1,7 @@
-import 'package:app_voluntario/features/vagas/pages/tela_detalhe_vaga.dart';
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_theme.dart';
 import '../models/recomendacao_model.dart';
+import '../../vagas/pages/tela_detalhe_vaga.dart';
 
 class CardVaga extends StatelessWidget {
   final VagaRecomendada vaga;
@@ -11,32 +12,38 @@ class CardVaga extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 230,
-      margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               vaga.titulo,
-              style: const TextStyle(
-                fontSize: 16,
+              style: AppTextStyles.subtitle.copyWith(
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
               ),
             ),
-            const SizedBox(height: 6),
-            Text('Causa: ${vaga.causa}',
-                style: const TextStyle(fontSize: 13, color: Colors.black87)),
-            Text('Local: ${vaga.localidade}',
-                style: const TextStyle(fontSize: 13, color: Colors.black87)),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Causa: ${vaga.causa}',
+              style: AppTextStyles.body,
+            ),
+            Text(
+              'Local: ${vaga.localidade}',
+              style: AppTextStyles.body,
+            ),
             const Spacer(),
             Align(
               alignment: Alignment.bottomRight,
@@ -51,7 +58,10 @@ class CardVaga extends StatelessWidget {
                 },
                 icon: const Icon(Icons.arrow_forward_ios, size: 14),
                 label: const Text('Ver mais'),
-                style: TextButton.styleFrom(foregroundColor: Colors.deepPurple),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],

@@ -15,7 +15,7 @@ class CardVagaHistorico extends StatelessWidget {
         : 'Data não informada';
 
     return Card(
-      color: AppColors.card,
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       shadowColor: Colors.black26,
