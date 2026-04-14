@@ -1,16 +1,21 @@
-# app_voluntario
+# 📱 App Voluntariado Inteligente
 
-A new Flutter project.
+Aplicativo mobile desenvolvido em Flutter para gerenciamento de voluntários.
 
-## Getting Started
+## 🚀 Funcionalidades
+- Login integrado com backend
+- Agenda com localização
+- Chat entre voluntário e instituição
+- Sistema de recompensas
+- Perfil do usuário
 
-This project is a starting point for a Flutter application.
+## 🛠️ Tecnologias
+- Flutter
+- Dart
+- API REST (Spring Boot)
 
-A few resources to get you started if this is your first Flutter project:
+## ⚙️ Como rodar
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter pub get
+flutter run
